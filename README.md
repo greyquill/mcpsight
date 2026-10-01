@@ -49,27 +49,47 @@ Point it at the MCP config you already have and it scans every server in it:
 $ mcpsight scan --from claude_desktop_config.json
 ```
 
-Or scan one server directly. This is real terminal output, and token counts are
-estimates until real BPE tokenizers land:
+Or scan one remote server by its URL. This works on macOS, Linux, and Windows:
 
 ```console
-$ mcpsight scan npx:@modelcontextprotocol/server-postgres
+$ mcpsight scan https://mcp.example.com/mcp
+```
 
-  @modelcontextprotocol/server-postgres
-  Server        @modelcontextprotocol/server-postgres  (0.6.2, via bubblewrap)
-  Grade         B  (80/100)  rubric v1
+Local servers (`npx:`, `uvx:`, or a command) run untrusted code, so mcpsight runs
+them in a sandbox. That needs Linux with bubblewrap. On macOS and Windows those
+entries are refused, and remote ones still scan.
 
-  Context cost  ~4,180 tokens  (11 tools)   ~$0.013 per request @ Claude Sonnet  (est.)
-  Capabilities  fs:read  net:egress
+Here is real output from one of the practice servers in this repo, which hides a
+different trick in each tool description. Token counts are estimates, and the
+output says so:
+
+```console
+$ mcpsight scan http://127.0.0.1:8931/poisoned
+
+  poisoned-descriptions
+  Server        poisoned-descriptions  (0.1.0, via remote)
+  Grade         F  (0/100)  rubric v1
+
+  Context cost  ~462 tokens  (5 tools)   ~$0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  code:eval  fs:read  fs:write
   Drift         baseline recorded (first scan)
 
   Findings
-  HIGH      Tool description issues an imperative instruction to the model [injection.imperative_instruction]
-      tool: query
-      fix: Descriptions should not tell the model what to do before/after other tools.
+  CRITICAL  Tool description tries to override the model's instructions [injection.override_instruction]
+      tool: summarize
+      fix: Remove instruction-like text from the description; a tool description should
+      describe the tool, not command the model.
+  HIGH      Tool description instructs reading sensitive or unrelated paths [injection.unrelated_path]
+      tool: weather
+      fix: Remove references to credential or system files; a tool's description should
+      not point the model at ~/.ssh, ~/.aws, .env, or similar.
+  ...
 
   Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif
 ```
+
+To run it yourself, clone the repo, start the practice servers with `make fixture`,
+and follow the [hands-on guide](docs/try-it/index.html).
 
 Then, in CI, fail the build if a server drifts from the baseline you committed:
 
@@ -222,19 +242,22 @@ Exit codes are CI-friendly: `0` clean, `1` findings above `--fail-on`, `2` scan 
 
 ## Status
 
-Pre-release. Every planned phase is built.
+Pre-release. What works today:
 
-| Phase | What shipped |
-|---|---|
-| 0, sandbox spike | Passed. See [`docs/phase0-spike.md`](docs/phase0-spike.md). |
-| 1, v0.1 | `scan` and `verify` over remote (Streamable HTTP) and local (stdio, bubblewrap-sandboxed) servers, with the context-cost, declared-capability, and drift analyzers, a transparent score, terminal and JSON output, and committable baselines. |
-| 2, launch | Full observed-capability sandbox (decoy-read and egress findings), the offline injection analyzer with its YAML rule set, the supply-chain analyzer (OSV CVEs, install scripts, typosquat), SARIF output, a CI workflow, and the malicious `testdata/servers/` fixtures. |
-| 3, the index | Postgres store, a pluggable registry crawler, the batch scan runner, the `mcpsight-index` service (JSON API and snapshot), and a static site ([`web/`](web/)) that publishes to GitHub Pages. One OCI image and `docker compose up` self-hosts the whole thing ([`deploy/`](deploy/)). Preview it with `make preview`. |
-| 4, durability | Auth-posture analyzer, `--markdown` output, contributor docs, live npx/uvx/docker target execution, sandbox resource limits, and cross-platform builds. |
+- `scan` and `verify` for remote servers on macOS, Linux, and Windows.
+- Local `npx:`, `uvx:`, and command servers on Linux, sandboxed with bubblewrap and
+  watched with strace. `docker:` images wherever Docker runs.
+- Six analyzers: context cost, capabilities (declared and observed), injection,
+  drift, supply chain, and auth posture. The score follows a published
+  [rubric](docs/rubric.md).
+- Terminal, JSON, SARIF, and Markdown output, CI-friendly exit codes, and baselines
+  you commit next to your config.
+- `mcpsight-index`, which runs the same analyzers over a whole registry. You can
+  self-host it today. The public index is not published yet.
 
-One deep item is tracked as future work: the hardened out-of-sandbox observation
-(netns proxy, `fanotify`, seccomp) that would replace `strace`. See
-[`docs/threat-model.md`](docs/threat-model.md).
+What it does not do yet is in the [threat model](docs/threat-model.md) and
+[known limitations](MANUAL.md#known-limitations). The biggest one is that code
+written to dodge strace can hide what it does.
 
 ## Open-core boundary
 
