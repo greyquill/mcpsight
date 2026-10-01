@@ -47,7 +47,7 @@ func (s *StdioTransport) Roundtrip(ctx context.Context, req *Request) (*Response
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		line, err := s.br.ReadBytes('\n')
+		line, err := readLine(s.br, MaxMessageBytes)
 		if err != nil {
 			return nil, err
 		}

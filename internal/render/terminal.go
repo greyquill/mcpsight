@@ -36,7 +36,7 @@ func (p painter) c(color, s string) string {
 func Terminal(w io.Writer, r *scan.Report, color bool) {
 	p := painter{on: color}
 	fmt.Fprintln(w)
-	fmt.Fprintf(w, "  %s\n", p.c(cBold, orDash(r.Server.Name, r.Target.Name)))
+	fmt.Fprintf(w, "  %s\n", p.c(cBold, Safe(orDash(r.Server.Name, r.Target.Name))))
 	line(w, "Server", serverLine(r))
 	line(w, "Grade", gradeLine(p, r))
 	fmt.Fprintln(w)
@@ -64,7 +64,7 @@ func serverLine(r *scan.Report) string {
 	if v == "" {
 		v = "unknown version"
 	}
-	return fmt.Sprintf("%s  (%s, via %s)", orDash(r.Server.Name, "?"), v, r.Runner)
+	return fmt.Sprintf("%s  (%s, via %s)", Safe(orDash(r.Server.Name, "?")), Safe(v), r.Runner)
 }
 
 func gradeLine(p painter, r *scan.Report) string {
@@ -153,15 +153,15 @@ func writeFindings(w io.Writer, p painter, r *scan.Report) {
 	fmt.Fprintf(w, "  %s\n", p.c(cBold, "Findings"))
 	for _, f := range sorted {
 		fmt.Fprintf(w, "  %s  %s %s\n",
-			sevBadge(p, f.Severity), p.c(cBold, f.Title), p.c(cDim, "["+f.RuleID+"]"))
+			sevBadge(p, f.Severity), p.c(cBold, Safe(f.Title)), p.c(cDim, "["+f.RuleID+"]"))
 		if f.Tool != "" {
-			fmt.Fprintf(w, "      %s\n", p.c(cCyan, "tool: "+f.Tool))
+			fmt.Fprintf(w, "      %s\n", p.c(cCyan, "tool: "+Safe(f.Tool)))
 		}
 		if f.Detail != "" {
-			fmt.Fprintf(w, "      %s\n", wrapIndent(f.Detail, 6, 78))
+			fmt.Fprintf(w, "      %s\n", wrapIndent(Safe(f.Detail), 6, 78))
 		}
 		if f.Remediation != "" {
-			fmt.Fprintf(w, "      %s %s\n", p.c(cDim, "fix:"), wrapIndent(f.Remediation, 6, 78))
+			fmt.Fprintf(w, "      %s %s\n", p.c(cDim, "fix:"), wrapIndent(Safe(f.Remediation), 6, 78))
 		}
 	}
 	fmt.Fprintln(w)

@@ -10,6 +10,7 @@ import (
 
 	"github.com/greyquill/mcpsight/internal/analyze"
 	"github.com/greyquill/mcpsight/internal/buildinfo"
+	"github.com/greyquill/mcpsight/internal/render"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +33,7 @@ func Execute(args []string) int {
 			}
 			return ce.code
 		}
-		fmt.Fprintln(os.Stderr, "mcpsight:", err)
+		fmt.Fprintln(os.Stderr, "mcpsight:", render.SafeBlock(err.Error()))
 		return ExitError
 	}
 	return ExitClean
@@ -100,7 +101,7 @@ func atLeast(sev, threshold analyze.Severity) bool {
 
 // targetError reports a per-target failure on stderr.
 func targetError(noColor bool, name string, err error) {
-	stderrLine(noColor, fmt.Sprintf("✗ %s: %v", name, err))
+	stderrLine(noColor, render.SafeBlock(fmt.Sprintf("✗ %s: %v", name, err)))
 }
 
 // stderrLine writes a warning or error to stderr, in red when stderr is a color

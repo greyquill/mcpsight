@@ -662,6 +662,19 @@ Install bubblewrap (`apt-get install bubblewrap`), or scan remote targets
 instead. macOS and Windows have no bubblewrap, so use a Linux host or a `docker:`
 target. The refusal is deliberate.
 
+**`server sent a message larger than 16 MiB`**
+
+mcpsight reads at most 16 MiB per message from a server, so a hostile server cannot
+exhaust your memory. Real tool lists are a few kilobytes. If an honest server hits
+this, open an issue with the server's name.
+
+**`\x1b` and similar escapes in output**
+
+mcpsight prints control characters from a server (names, descriptions, stderr) as
+visible escapes instead of passing them to your terminal. A server cannot clear your
+screen, set your window title, or forge report lines. Markdown output escapes the same
+text so it cannot add links, HTML, or table cells to a pull-request comment.
+
 **`capability.not_observed` on a stdio scan**
 
 Install `strace`. Without it the sandbox still isolates the server, but nothing

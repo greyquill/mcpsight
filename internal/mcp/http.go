@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -79,10 +80,10 @@ func (h *HTTPTransport) Roundtrip(ctx context.Context, req *Request) (*Response,
 
 	ct := resp.Header.Get("Content-Type")
 	if strings.Contains(ct, "text/event-stream") {
-		return readSSEResponse(resp.Body, req.ID)
+		return readSSEResponse(resp.Body, req.ID, MaxMessageBytes)
 	}
 	var out Response
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+	if err := json.NewDecoder(&limitedReader{r: resp.Body, n: MaxMessageBytes}).Decode(&out); err != nil {
 		return nil, fmt.Errorf("decoding json response: %w", err)
 	}
 	return &out, nil
@@ -109,9 +110,9 @@ func (h *HTTPTransport) Close() error { return nil }
 
 // readSSEResponse scans an SSE stream for the first data event carrying a
 // JSON-RPC response with the matching id.
-func readSSEResponse(r io.Reader, id int) (*Response, error) {
+func readSSEResponse(r io.Reader, id int, max int) (*Response, error) {
 	sc := bufio.NewScanner(r)
-	sc.Buffer(make([]byte, 0, 64*1024), 4<<20)
+	sc.Buffer(make([]byte, 0, 64*1024), max)
 	var data strings.Builder
 	flush := func() (*Response, bool) {
 		defer data.Reset()
@@ -138,10 +139,18 @@ func readSSEResponse(r io.Reader, id int) (*Response, error) {
 				return resp, nil
 			}
 		case strings.HasPrefix(line, "data:"):
-			data.WriteString(strings.TrimPrefix(strings.TrimPrefix(line, "data:"), " "))
+			chunk := strings.TrimPrefix(strings.TrimPrefix(line, "data:"), " ")
+			// An event whose data lines never end would otherwise grow forever.
+			if data.Len()+len(chunk) > max {
+				return nil, ErrMessageTooLarge
+			}
+			data.WriteString(chunk)
 		}
 	}
 	if err := sc.Err(); err != nil {
+		if errors.Is(err, bufio.ErrTooLong) {
+			return nil, ErrMessageTooLarge
+		}
 		return nil, err
 	}
 	if resp, ok := flush(); ok {
