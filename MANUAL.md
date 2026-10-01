@@ -442,14 +442,18 @@ is skipped entirely under `--offline`.
 |---|---|---|
 | `supplychain.known_cve` | high | A dependency has a known CVE (via [OSV.dev](https://osv.dev), free, no key) |
 | `supplychain.install_script` | high | A `postinstall` or equivalent runs at install time |
-| `supplychain.typosquat` | high | The name is suspiciously close to a well-known server |
+| `supplychain.typosquat` | high | The name is one or two edits from a well-known server, or is its name under another scope |
 | `supplychain.no_source` | medium | No resolvable source repository, so you cannot audit it |
 | `supplychain.single_maintainer` | low | Bus-factor of one |
 | `supplychain.young_package` | low | Published very recently |
 | `supplychain.metadata_unavailable` | info | Registry metadata could not be fetched |
 
-Typosquatting is checked by Levenshtein and keyboard-adjacency distance against
-known registry names. `mcp-server-postgress` should scream, and does.
+The typosquat check compares the package name with a curated list of popular MCP
+packages. It flags a name one or two edits away from one of them
+(`@modelcontextprotocol/server-postgress`), and a popular name published under
+another scope (`@evil/server-postgres`). A package on the list is never flagged,
+even when it is close to another one, so `server-gitlab` is not a squat of
+`server-github`. The list lives in `internal/analyze/supplychain/typosquat.go`.
 
 ### Auth posture
 

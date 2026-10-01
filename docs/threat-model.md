@@ -53,7 +53,7 @@ for the code under scan, which is contained (see §6).
 | Cross-tool hijack | Description references *other* tools/servers by name | **Injection:** cross-reference rule |
 | Smuggle instructions past human review | Zero-width / bidi / homoglyph / base64 in descriptions | **Injection:** invisible-character & encoded-blob rules |
 | Bait-and-switch trusted server | Description/schema/capability changes after adoption | **Drift:** canonical-manifest diff, severity by direction of change |
-| Impersonate a popular server | Typosquatted package name | **Supply chain:** Levenshtein / keyboard-adjacency vs registry |
+| Impersonate a popular server | Typosquatted package name | **Supply chain:** edit distance, and same name under another scope, vs a curated list of popular packages |
 | Ship unauditable code | No source, install scripts, deep deps, known CVEs | **Supply chain:** source availability, `postinstall`, OSV.dev, maintainer signal |
 | Reach an exposed remote server | `tools/list` with no auth; weak TLS | **Auth posture:** unauthenticated-probe result, TLS basics |
 | Impose an invisible tax | Verbose/bloated tool schemas | **Context cost:** per-model token count, schema-bloat remediation |

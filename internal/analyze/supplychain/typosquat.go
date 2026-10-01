@@ -23,21 +23,37 @@ var popularPackages = []string{
 	"mcp-server-time",
 }
 
-// nearestSquat returns a popular package name that `name` is suspiciously close
-// to (edit distance 1–2 on the unscoped portion) without being identical, or ""
-// if none. Comparing the unscoped tail catches squats that keep the scope.
-func nearestSquat(name string) string {
-	target := unscoped(name)
+// squat is a popular package that a scanned name imitates.
+type squat struct {
+	target   string // the popular package being imitated
+	sameName bool   // same name under another scope, rather than a near spelling
+	distance int    // edit distance between the unscoped names; 0 when sameName
+}
+
+// nearestSquat reports the popular package that name imitates, or ok=false.
+// A popular package is never a squat of another, so exact matches are checked
+// against the whole list first. Then the same unscoped name under a different
+// scope (@evil/server-postgres) counts, since that is the cheapest squat to
+// publish. Last, the closest name one or two edits away on the unscoped part.
+func nearestSquat(name string) (squat, bool) {
 	for _, p := range popularPackages {
 		if p == name {
-			return "" // it *is* the popular package
-		}
-		d := levenshtein(target, unscoped(p))
-		if d >= 1 && d <= 2 {
-			return p
+			return squat{}, false
 		}
 	}
-	return ""
+	tail := unscoped(name)
+	for _, p := range popularPackages {
+		if unscoped(p) == tail {
+			return squat{target: p, sameName: true}, true
+		}
+	}
+	best := squat{distance: 3}
+	for _, p := range popularPackages {
+		if d := levenshtein(tail, unscoped(p)); d < best.distance {
+			best = squat{target: p, distance: d}
+		}
+	}
+	return best, best.target != ""
 }
 
 func unscoped(name string) string {

@@ -38,13 +38,17 @@ func (a *Analyzer) Analyze(ctx context.Context, in *analyze.Input) []analyze.Fin
 
 	// Typosquat is offline-cheap and does not need registry metadata.
 	var findings []analyze.Finding
-	if squat := nearestSquat(name); squat != "" {
+	if sq, ok := nearestSquat(name); ok {
+		detail := fmt.Sprintf("%q is one or two keystrokes from %q. Typosquatting is how malicious packages get installed by mistake.", name, sq.target)
+		if sq.sameName {
+			detail = fmt.Sprintf("%q has the same name as %q under a different scope. Publishing a popular name under another scope is a common way to get a malicious package installed.", name, sq.target)
+		}
 		findings = append(findings, analyze.Finding{
 			Analyzer: "supplychain", RuleID: "supplychain.typosquat", Severity: analyze.High,
 			Title:       "Package name resembles a popular package",
-			Detail:      fmt.Sprintf("%q is one or two keystrokes from %q. Typosquatting is how malicious packages get installed by mistake.", name, squat),
-			Remediation: fmt.Sprintf("Confirm you meant %q and not %q.", name, squat),
-			Meta:        map[string]any{"suspected_target": squat},
+			Detail:      detail,
+			Remediation: fmt.Sprintf("Confirm you meant %q and not %q.", name, sq.target),
+			Meta:        map[string]any{"suspected_target": sq.target},
 		})
 	}
 

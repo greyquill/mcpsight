@@ -87,7 +87,7 @@ namespaced `<analyzer>.<rule>`.
 | Rule | Default severity | Threat |
 |---|---|---|
 | `supplychain.install_script`: `postinstall`/lifecycle script present | **high** | Arbitrary code on install |
-| `supplychain.typosquat`: name near a popular registry entry | **high** | Impersonation |
+| `supplychain.typosquat`: name near a popular package, or its name under another scope | **high** | Impersonation |
 | `supplychain.known_cve`: dependency with a known OSV advisory | **high**/**medium** (by CVSS) | Known-vulnerable dep |
 | `supplychain.no_source`: no resolvable/ matching source repo | **medium** | Unauditable |
 | `supplychain.single_maintainer`: one publisher | **low** | Bus-factor / account takeover |
