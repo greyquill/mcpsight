@@ -18,5 +18,12 @@ func (*Direct) Start(ctx context.Context, spec Spec) (*Session, error) {
 	if len(spec.Command) == 0 {
 		return nil, fmt.Errorf("empty command")
 	}
-	return startProcess(ctx, spec, spec.Command[0], spec.Command[1:], func() {}, nil)
+	sess, err := startProcess(ctx, spec, spec.Command[0], spec.Command[1:], func() {}, nil)
+	if err != nil {
+		return nil, err
+	}
+	if spec.Trace {
+		sess.traceSkipped = "--no-sandbox runs are not observed"
+	}
+	return sess, nil
 }

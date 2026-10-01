@@ -76,16 +76,24 @@ func gradeLine(p painter, r *scan.Report) string {
 		color = cRed
 	}
 	return fmt.Sprintf("%s  (%d/100%s)  %s",
-		p.c(cBold+color, r.Score.Grade), r.Score.Score, cappedNote(r),
+		p.c(cBold+color, r.Score.Grade), r.Score.Score, gradeNote(r),
 		p.c(cDim, fmt.Sprintf("rubric v%d", r.RubricVersion)))
 }
 
-// cappedNote explains a score the critical cap held down.
-func cappedNote(r *scan.Report) string {
+// gradeNote qualifies the score: a critical cap held it down, or the server ran
+// unobserved, so a high grade covers declared capabilities only.
+func gradeNote(r *scan.Report) string {
+	var note string
 	if r.Score.Capped {
-		return ", capped by a critical finding"
+		note += ", capped by a critical finding"
 	}
-	return ""
+	for _, f := range r.Findings {
+		if f.RuleID == "capability.not_observed" {
+			note += ", behavior not observed"
+			break
+		}
+	}
+	return note
 }
 
 func contextLine(r *scan.Report) string {

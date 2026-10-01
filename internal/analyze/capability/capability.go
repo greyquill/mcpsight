@@ -178,6 +178,17 @@ func (Analyzer) Analyze(_ context.Context, in *analyze.Input) []analyze.Finding 
 // server's own); and egress with no declared net:egress capability is a
 // declared-vs-observed gap.
 func observed(in *analyze.Input) []analyze.Finding {
+	if in.Unobserved != "" {
+		// Say so, or a run that was never watched reads as a clean one.
+		return []analyze.Finding{{
+			Analyzer: "capability", RuleID: "capability.not_observed", Severity: analyze.Info,
+			Title: "Server behavior was not observed",
+			Detail: "mcpsight could not watch what the server did while it ran (" + in.Unobserved +
+				"), so it did not check for credential reads or network access. " +
+				"The grade reflects declared capabilities only.",
+			Remediation: "Scan on Linux with bubblewrap and strace installed to observe credential reads and network access.",
+		}}
+	}
 	tr := in.Trace
 	if tr == nil {
 		return nil

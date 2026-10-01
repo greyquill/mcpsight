@@ -67,6 +67,9 @@ type Input struct {
 	Baseline *manifest.Manifest
 	Trace    *SandboxTrace
 	Package  *PackageMeta
+	// Unobserved says why a stdio run was not traced (strace missing, Docker,
+	// --no-sandbox). Empty when traced, and for remote targets.
+	Unobserved string
 
 	// PackageSpec and Ecosystem identify the published package for the
 	// supply-chain analyzer (e.g. "@scope/name@1.2.3", "npm"). Empty for remote

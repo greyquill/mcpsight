@@ -27,7 +27,7 @@ func writeMarkdownReport(w io.Writer, r *scan.Report) {
 	if name == "" {
 		name = r.Target.Name
 	}
-	fmt.Fprintf(w, "### mcpsight: `%s`, grade %s (%d/100%s)\n\n", name, r.Score.Grade, r.Score.Score, cappedNote(r))
+	fmt.Fprintf(w, "### mcpsight: `%s`, grade %s (%d/100%s)\n\n", name, r.Score.Grade, r.Score.Score, gradeNote(r))
 
 	if len(r.ContextCost.Models) > 0 {
 		m := r.ContextCost.Models[0]

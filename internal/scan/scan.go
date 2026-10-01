@@ -130,6 +130,7 @@ func Run(ctx context.Context, t target.Target, opts Options) (*Report, error) {
 		Manifest:    m,
 		Baseline:    opts.Baseline,
 		Trace:       res.Trace,
+		Unobserved:  res.Unobserved,
 		Auth:        res.Auth,
 		PackageSpec: t.Package,
 		Ecosystem:   ecosystem(t.Kind),

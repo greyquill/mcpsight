@@ -3,6 +3,7 @@ package capability
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/greyquill/mcpsight/internal/analyze"
@@ -106,6 +107,40 @@ func TestCommonWordsDoNotOverclassify(t *testing.T) {
 	for _, c := range cases {
 		if got := ClassifyTool(c.tool); has(got, c.bad) {
 			t.Errorf("tool %q wrongly classified as %s: %v", c.tool.Name, c.bad, got)
+		}
+	}
+}
+
+func TestUnobservedRunSaysSo(t *testing.T) {
+	in := &analyze.Input{
+		Manifest:   &manifest.Manifest{Tools: []manifest.Tool{{Name: "x", Description: "docs"}}},
+		Unobserved: "strace is not installed",
+	}
+	var got *analyze.Finding
+	for _, f := range (Analyzer{}).Analyze(context.Background(), in) {
+		if f.RuleID == "capability.not_observed" {
+			got = &f
+		}
+	}
+	if got == nil {
+		t.Fatal("an unobserved stdio run must produce capability.not_observed")
+	}
+	if got.Severity != analyze.Info {
+		t.Errorf("severity = %s, want info", got.Severity)
+	}
+	if !strings.Contains(got.Detail, "strace is not installed") {
+		t.Errorf("detail should carry the reason, got %q", got.Detail)
+	}
+}
+
+func TestObservedRunHasNoNotObservedFinding(t *testing.T) {
+	in := &analyze.Input{
+		Manifest: &manifest.Manifest{Tools: []manifest.Tool{{Name: "x", Description: "docs"}}},
+		Trace:    &analyze.SandboxTrace{NetDenied: true},
+	}
+	for _, f := range (Analyzer{}).Analyze(context.Background(), in) {
+		if f.RuleID == "capability.not_observed" {
+			t.Error("a traced run must not report capability.not_observed")
 		}
 	}
 }

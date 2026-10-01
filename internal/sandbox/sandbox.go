@@ -35,14 +35,20 @@ type Session struct {
 	Stdin  io.WriteCloser
 	Stdout io.Reader
 
-	stderr  *capBuffer
-	trace   *analyze.SandboxTrace
-	closeFn func() error
+	stderr       *capBuffer
+	trace        *analyze.SandboxTrace
+	traceSkipped string
+	closeFn      func() error
 }
 
 // Trace returns observed behavior from the run. Nil in Phase 1 (declared-only);
 // Phase 2 populates decoy reads and egress attempts.
 func (s *Session) Trace() *analyze.SandboxTrace { return s.trace }
+
+// TraceSkipped says why behavior was not observed although Spec.Trace asked for
+// it. Empty when the run was traced or tracing was not requested. A scan must
+// report this, or an unobserved run would look clean.
+func (s *Session) TraceSkipped() string { return s.traceSkipped }
 
 // Stderr returns whatever the process wrote to stderr (for diagnostics).
 func (s *Session) Stderr() string {

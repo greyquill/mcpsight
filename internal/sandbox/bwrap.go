@@ -136,6 +136,9 @@ func (*Bwrap) Start(ctx context.Context, spec Spec) (*Session, error) {
 		os.RemoveAll(work)
 		return nil, err
 	}
+	if spec.Trace && !tracing {
+		sess.traceSkipped = "strace is not installed"
+	}
 	return sess, nil
 }
 

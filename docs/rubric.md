@@ -61,6 +61,7 @@ namespaced `<analyzer>.<rule>`.
 | `capability.decoy_read`: read a decoy credential file | **critical** | Credential theft |
 | `capability.egress_unexpected`: egress not declared by the server's stated function | **high** | Exfiltration |
 | `capability.declared_observed_gap`: observed capability exceeds declared | **high** | Hidden capability |
+| `capability.not_observed`: the run was not traced (no strace, Docker, or `--no-sandbox`) | **info** | Transparency (checks skipped) |
 
 ### Injection (tool descriptions)
 | Rule | Default severity | Threat |

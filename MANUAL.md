@@ -376,6 +376,7 @@ while initializing.
 | `capability.decoy_read` | critical | The server read a decoy credential file |
 | `capability.egress_unexpected` | high | Network egress not explained by the server's stated function |
 | `capability.declared_observed_gap` | high | Observed behavior exceeds what was declared |
+| `capability.not_observed` | info | mcpsight ran the server but could not watch it, so the three checks above did not run |
 
 `capability.decoy_read` is the finding this whole sandbox exists to produce. The
 fake home contains `~/.ssh/id_rsa`, `~/.aws/credentials`, and `.env`. A
@@ -657,10 +658,13 @@ Install bubblewrap (`apt-get install bubblewrap`), or scan remote targets
 instead. macOS and Windows have no bubblewrap, so use a Linux host or a `docker:`
 target. The refusal is deliberate.
 
-**Observed capabilities are always empty**
+**`capability.not_observed` on a stdio scan**
 
-Install `strace`. Without it the sandbox still isolates correctly, but nothing is
-observed, so `capability.*` findings from the trace never fire.
+Install `strace`. Without it the sandbox still isolates the server, but nothing
+watches it, so the decoy-read and egress checks cannot fire. The report says so
+with this info finding, so a grade from such a run covers declared capabilities
+only. `docker:` targets and `--no-sandbox` runs get the same finding, because
+neither is traced yet.
 
 **`no baseline recorded. Run 'mcpsight scan' first`**
 

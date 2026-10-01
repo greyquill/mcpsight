@@ -36,6 +36,9 @@ type Result struct {
 	Auth     *analyze.AuthPosture  // remote auth/TLS posture; nil for stdio
 	Runner   string                // sandbox backend used, or "remote"
 	AllowNet bool
+	// Unobserved says why a stdio run's behavior was not traced; empty when it
+	// was traced, and for remote targets, which run nothing locally.
+	Unobserved string
 }
 
 // Probe executes a target and returns its manifest.
@@ -169,6 +172,7 @@ func probeStdio(ctx context.Context, t target.Target, opts Options) (*Result, er
 	return &Result{
 		Target: t, Manifest: m, Trace: sess.Trace(),
 		Runner: runner.Name(), AllowNet: allowNet,
+		Unobserved: sess.TraceSkipped(),
 	}, nil
 }
 

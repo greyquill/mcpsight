@@ -65,5 +65,8 @@ func (*Docker) Start(ctx context.Context, spec Spec) (*Session, error) {
 		os.RemoveAll(work)
 		return nil, err
 	}
+	if spec.Trace {
+		sess.traceSkipped = "the Docker runner does not observe behavior yet"
+	}
 	return sess, nil
 }
