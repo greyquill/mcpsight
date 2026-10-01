@@ -1,0 +1,46 @@
+# The whole index, runnable by a stranger in one command:
+#
+#   docker compose -f deploy/docker-compose.yml up --build
+#
+# Then open http://localhost:8080. It comes up empty. Populate it by pointing the
+# batch runner at the same database. The minimal service image can scan REMOTE
+# servers directly:
+#
+#   docker compose -f deploy/docker-compose.yml run --rm \
+#     -v "$PWD/testdata/index-seed.json:/seed.json" index scan-batch --seed /seed.json
+#
+# Scanning stdio servers (npx/uvx) needs bubblewrap + node, which the scratch
+# image does not carry. Run `mcpsight-index scan-batch` on a host/CI runner that
+# has the sandbox, against this same MCPSIGHT_DSN.
+#
+# No managed-service dependencies. Postgres is Postgres anywhere.
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: mcpsight
+      POSTGRES_PASSWORD: mcpsight
+      POSTGRES_DB: mcpsight
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcpsight"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  index:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      MCPSIGHT_DSN: postgres://mcpsight:mcpsight@db:5432/mcpsight?sslmode=disable
+      MCPSIGHT_ADDR: ":8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

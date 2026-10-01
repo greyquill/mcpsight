@@ -1,0 +1,43 @@
+# Builds, signs, and drafts a GitHub release when a v* tag is pushed.
+# A maintainer reviews the draft and publishes it by hand.
+#
+# Secrets:
+#   HOMEBREW_TAP_TOKEN  optional. A fine-grained token with contents:write on
+#                       greyquill/homebrew-tap. Without it the cask is not pushed.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write      # create the release
+  id-token: write      # keyless cosign signing and provenance
+  attestations: write  # build provenance attestations
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+      - uses: sigstore/cosign-installer@v3
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/checksums.txt

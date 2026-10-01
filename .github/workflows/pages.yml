@@ -1,0 +1,39 @@
+# Publishes the static Registry Security Index (web/) to GitHub Pages.
+# Because the org's Pages apex is www.greyquill.io, this project site is served
+# at https://www.greyquill.io/mcpsight/ once the repo is public and Pages is
+# enabled (Settings → Pages → Source: GitHub Actions).
+#
+# The site reads web/data/snapshot.json, which the index publishes:
+#   mcpsight-index scan-batch ... && mcpsight-index snapshot -o web/data/snapshot.json
+# Commit the refreshed snapshot (e.g. from a monthly cron) and this redeploys it.
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4

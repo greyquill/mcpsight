@@ -1,0 +1,32 @@
+# Config is environment variables (twelve-factor). Bring your own Postgres:
+# RDS, Cloud SQL, IBM Cloud Databases, or an in-cluster container; the app does
+# not care. No managed-service dependencies.
+image:
+  repository: ghcr.io/greyquill/mcpsight-index
+  tag: ""            # defaults to .Chart.AppVersion
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# The Postgres DSN. Set here, or reference an existing secret via dsnSecret.
+database:
+  dsn: "postgres://mcpsight:mcpsight@postgres:5432/mcpsight?sslmode=disable"
+  dsnSecret: ""      # name of a Secret with key MCPSIGHT_DSN (takes precedence)
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  annotations: {}

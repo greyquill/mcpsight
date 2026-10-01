@@ -1,0 +1,7 @@
+apiVersion: v2
+name: mcpsight-index
+description: The MCP Registry Security Index (Greyquill Software), self-hostable on any Kubernetes.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/greyquill/mcpsight

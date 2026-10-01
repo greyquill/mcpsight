@@ -1,0 +1,56 @@
+# mcpsight injection rule set, Greyquill Software
+#
+# These rules detect tool-poisoning / prompt-injection patterns in MCP tool
+# DESCRIPTIONS (and names), which are fed to the model and can therefore instruct
+# it directly. The set is intentionally conservative: a noisy analyzer gets
+# uninstalled. Dispute or extend it via --rules; every rule id maps to a row in
+# docs/rubric.md.
+#
+# Each rule matches if ANY of its regexes (Go/RE2 syntax, case-insensitive via
+# (?i)) matches the tool's "name\ndescription". Structural detectors that regex
+# cannot express (zero-width/bidi/homoglyph text, base64 payloads, excessive
+# length) are built into the analyzer, not listed here.
+version: 1
+rules:
+  - id: injection.override_instruction
+    severity: critical
+    title: "Tool description tries to override the model's instructions"
+    remediation: "Remove instruction-like text from the description; a tool description should describe the tool, not command the model."
+    any:
+      - '(?i)ignore\s+(all\s+)?(previous|prior|above)\s+instructions'
+      - '(?i)disregard\s+(the\s+)?(above|previous|prior|system)'
+      - '(?i)do\s+not\s+(tell|inform|mention\s+to|reveal\s+to|notify)\s+the\s+user'
+      - '(?i)(without|don''?t)\s+(telling|informing|notifying)\s+the\s+user'
+      - '(?i)do\s+not\s+mention\s+this'
+
+  - id: injection.imperative_instruction
+    severity: high
+    title: "Tool description issues an imperative instruction to the model"
+    remediation: "Descriptions should not tell the model what to do before/after other tools. State only what this tool does."
+    any:
+      - '(?i)before\s+(calling|using|running|invoking)\s+any\s+other\s+tool'
+      - '(?i)before\s+you\s+(do|call|use|answer|respond)\s+anything'
+      - '(?i)you\s+(are\s+required|must|should\s+always)\s+to?\b'
+      - '(?i)always\s+(call|invoke|read|include|append|forward)\b'
+      - '(?i)first\s+(read|call|fetch|send|forward|exfiltrate)\b'
+
+  - id: injection.cross_tool_reference
+    severity: high
+    title: "Tool description references another tool or server"
+    remediation: "A tool must not orchestrate other tools through its description; this is how cross-tool hijacking works."
+    any:
+      - '(?i)from\s+the\s+other\s+server'
+      - '(?i)(call|use|invoke)\s+the\s+`[^`]+`\s+tool'
+      - '(?i)(call|use|invoke)\s+the\s+\w+_\w+\s+tool'
+
+  - id: injection.unrelated_path
+    severity: high
+    title: "Tool description instructs reading sensitive or unrelated paths"
+    remediation: "Remove references to credential or system files; a tool's description should not point the model at ~/.ssh, ~/.aws, .env, or similar."
+    any:
+      - '(?i)(~|\$HOME)/\.ssh/'
+      - '(?i)(~|\$HOME)/\.aws/'
+      - '(?i)id_rsa\b'
+      - '(?i)\.env\b'
+      - '(?i)/etc/(passwd|shadow)'
+      - '(?i)\b(aws_secret|api[_\s-]?key|credentials\s+file)\b'

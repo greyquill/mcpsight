@@ -1,0 +1,92 @@
+# Release config for mcpsight, published by Greyquill Software.
+# Runs from .github/workflows/release.yml when a v* tag is pushed.
+# Dry run locally: goreleaser release --snapshot --clean
+version: 2
+
+project_name: mcpsight
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: mcpsight
+    main: ./cmd/mcpsight
+    binary: mcpsight
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w
+      - -X github.com/greyquill/mcpsight/internal/buildinfo.Version=v{{ .Version }}
+      - -X github.com/greyquill/mcpsight/internal/buildinfo.Commit={{ .ShortCommit }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: mcpsight
+    ids: [mcpsight]
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files: [LICENSE, NOTICE, README.md, SECURITY.md]
+
+checksum:
+  name_template: checksums.txt
+
+# Keyless Sigstore signature over checksums.txt, using the workflow's OIDC identity.
+signs:
+  - cmd: cosign
+    artifacts: checksum
+    signature: "${artifact}.sig"
+    certificate: "${artifact}.pem"
+    args:
+      - sign-blob
+      - --yes
+      - --output-signature=${signature}
+      - --output-certificate=${certificate}
+      - ${artifact}
+
+homebrew_casks:
+  - name: mcpsight
+    ids: [mcpsight]
+    binaries: [mcpsight]
+    repository:
+      owner: greyquill
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Casks
+    homepage: https://www.greyquill.io/mcpsight/
+    description: Inspect an MCP server before you trust it
+    license: Apache-2.0
+    commit_author:
+      name: greyquill
+      email: amarnath@greyquill.io
+    # Until the tap exists and its token is set, build the cask but do not push it.
+    skip_upload: '{{ if not (index .Env "HOMEBREW_TAP_TOKEN") }}true{{ end }}'
+    # The binaries are not notarized, so clear Gatekeeper's quarantine flag.
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/mcpsight"]
+          end
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude: ["^docs:", "^test:", "^ci:"]
+
+release:
+  github:
+    owner: greyquill
+    name: mcpsight
+  draft: true
+  prerelease: auto
+  name_template: "mcpsight v{{ .Version }}"
+  footer: |
+    Verify a download with the steps in [SECURITY.md](https://github.com/greyquill/mcpsight/blob/main/SECURITY.md#verifying-a-release).

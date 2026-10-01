@@ -1,0 +1,16 @@
+{
+  "servers": [
+    {
+      "name": "example-remote-docs",
+      "description": "A remote MCP server exposed over Streamable HTTP.",
+      "repo_url": "https://github.com/example/docs-mcp",
+      "targets": ["https://mcp.example.com/sse"]
+    },
+    {
+      "name": "@modelcontextprotocol/server-postgres",
+      "description": "Read-only Postgres access over MCP.",
+      "repo_url": "https://github.com/modelcontextprotocol/servers",
+      "targets": ["npx:@modelcontextprotocol/server-postgres"]
+    }
+  ]
+}
