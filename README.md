@@ -9,7 +9,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
   <a href="https://golang.org"><img alt="Go 1.26+" src="https://img.shields.io/badge/go-1.26%2B-00ADD8.svg?logo=go&logoColor=white"></a>
-  <a href=".github/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/badge/CI-vet%20%C2%B7%20test%20%C2%B7%20build-success.svg"></a>
+  <a href="https://github.com/greyquill/mcpsight/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/greyquill/mcpsight/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="docs/rubric.md"><img alt="Rubric v1" src="https://img.shields.io/badge/rubric-v1-informational.svg"></a>
   <a href="#safety-untrusted-code-runs-in-a-sandbox"><img alt="Sandboxed" src="https://img.shields.io/badge/untrusted%20code-sandboxed-critical.svg"></a>
   <br/>
