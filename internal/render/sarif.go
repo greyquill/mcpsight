@@ -3,6 +3,7 @@ package render
 import (
 	"encoding/json"
 	"io"
+	"sort"
 
 	"github.com/greyquill/mcpsight/internal/analyze"
 	"github.com/greyquill/mcpsight/internal/buildinfo"
@@ -15,7 +16,8 @@ import (
 // server and tool it came from.
 func SARIF(w io.Writer, reports []*scan.Report) error {
 	rulesByID := map[string]sarifRule{}
-	var results []sarifResult
+	// SARIF requires an array here: a clean scan must write [], never null.
+	results := []sarifResult{}
 
 	for _, r := range reports {
 		for _, f := range r.Findings {
@@ -44,6 +46,7 @@ func SARIF(w io.Writer, reports []*scan.Report) error {
 	for _, r := range rulesByID {
 		rules = append(rules, r)
 	}
+	sort.Slice(rules, func(i, j int) bool { return rules[i].ID < rules[j].ID })
 
 	doc := sarifDoc{
 		Schema:  "https://json.schemastore.org/sarif-2.1.0.json",
