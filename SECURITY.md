@@ -7,9 +7,12 @@ MCP servers you do not control, so a bug in mcpsight can put your machine at ris
 
 Please report it privately. Do not open a public issue.
 
-Use GitHub's private reporting: open the
-[Security tab](https://github.com/greyquill/mcpsight/security) and choose
-**Report a vulnerability**. Only the maintainers can see the report.
+Use either private channel:
+
+- **GitHub:** open the [Security tab](https://github.com/greyquill/mcpsight/security)
+  and choose **Report a vulnerability**. Only the maintainers can see the report.
+- **Email:** write to [contact@greyquill.io](mailto:contact@greyquill.io) and start
+  the subject with "MCPsight security".
 
 Tell us what you can:
 
