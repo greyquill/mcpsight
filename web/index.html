@@ -153,6 +153,14 @@ footer{border-top:1px solid var(--line);padding:56px 0 40px;font-size:14.5px}
 .foot p{color:var(--ink2);max-width:300px}
 .legal{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:40px;padding-top:24px;border-top:1px solid var(--line);color:var(--ink3);font-size:13.5px}
 .legal a{color:var(--ink3)}
+.demo-modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:24px;background:rgba(6,14,22,.62);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);opacity:0;transition:opacity .2s ease;cursor:zoom-out}
+.demo-modal[hidden]{display:none}
+.demo-modal.open{opacity:1}
+.demo-box{position:relative;width:min(1100px,100%);cursor:default}
+.demo-box video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:16px;background:#050B12;box-shadow:0 30px 90px rgba(0,0,0,.55)}
+.demo-close{position:absolute;top:-46px;right:0;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(15,29,42,.8);color:#fff;font:400 24px/1 var(--font);cursor:pointer}
+.demo-close:hover{background:rgba(15,29,42,1)}
+@media (prefers-reduced-motion:reduce){.demo-modal{transition:none}}
 @media (max-width:900px){
   .links{display:none}.feats,.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.split,.split.flip{grid-template-columns:minmax(0,1fr)}.split.flip .text{order:0}.foot{grid-template-columns:1fr 1fr}
 }
@@ -181,7 +189,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 40px;font-size:14.5px}
   <p class="lede">MCPsight reads every tool description the model will read, runs local servers in a sandbox with decoy credentials, and fails your build when a server changes.</p>
   <div class="cta">
     <a class="btn solid" href="docs/install.html">Get started <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    <a class="btn ghost" href="#demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch demo</a>
+    <a class="btn ghost" href="#demo" data-demo><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch demo</a>
   </div>
   <p class="meta">Apache-2.0 · Runs offline · No account or API key</p>
   <div class="shot" id="demo"><div class="term "><div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span>mcpsight scan</span></div><pre><span class="ln cmd"><span class="p">$ </span><span class="typed">mcpsight scan http://127.0.0.1:8931/poisoned</span></span>
@@ -312,6 +320,14 @@ footer{border-top:1px solid var(--line);padding:56px 0 40px;font-size:14.5px}
   <div class="legal"><span>&copy; 2026 Greyquill Software Private Limited</span><span><a href="privacy/">Privacy</a> · Licensed under <a href="https://github.com/greyquill/mcpsight/blob/main/LICENSE">Apache-2.0</a></span></div>
 </div></footer>
 
+<div class="demo-modal" id="demo-modal" hidden>
+  <div class="demo-box" role="dialog" aria-modal="true" aria-label="MCPsight demo video">
+    <video id="demo-video" controls playsinline preload="none" poster="demo/poster.jpg" width="1920" height="1080">
+      <source src="demo/mcpsight-demo.mp4" type="video/mp4">
+    </video>
+    <button class="demo-close" type="button" aria-label="Close video">&times;</button>
+  </div>
+</div>
 <script>
 (function () {
   "use strict";
@@ -335,6 +351,29 @@ footer{border-top:1px solid var(--line);padding:56px 0 40px;font-size:14.5px}
       }, function () {});
     };
   });
+
+  var modal = document.getElementById("demo-modal"), video = document.getElementById("demo-video"), opener = null;
+  function openDemo(e) {
+    e.preventDefault();
+    opener = document.activeElement;
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+    void modal.offsetWidth; // apply the hidden state first so the fade-in runs
+    modal.classList.add("open");
+    var p = video.play(); if (p && p.catch) p.catch(function () {});
+    modal.querySelector(".demo-close").focus({ preventScroll: true });
+  }
+  function closeDemo() {
+    if (modal.hidden) return;
+    video.pause(); video.currentTime = 0;
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+    setTimeout(function () { modal.hidden = true; }, 200);
+    if (opener && opener.focus) opener.focus({ preventScroll: true });
+  }
+  document.querySelectorAll("[data-demo]").forEach(function (a) { a.addEventListener("click", openDemo); });
+  modal.addEventListener("click", function (e) { if (!e.target.closest("video")) closeDemo(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDemo(); });
 
   // Replay each terminal when it scrolls into view: type the command, then reveal the output.
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
