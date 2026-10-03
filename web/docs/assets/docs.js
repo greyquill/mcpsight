@@ -78,7 +78,13 @@
 
   /* ---------- sidebar ---------- */
   var side = document.getElementById("sidebar");
-  var html = '<a class="brand" href="../"><span class="brand-mark">M</span><span class="brand-text"><b>MCPsight</b><small>Documentation</small></span></a>' +
+  function themeSwitch() {
+    return '<div class="theme" role="group" aria-label="Theme">' +
+      ["light", "system", "dark"].map(function (t) {
+        return '<button type="button" data-t="' + t + '" aria-label="' + t + ' theme" title="' + t.charAt(0).toUpperCase() + t.slice(1) + '" aria-pressed="false">' + ICONS[t] + "</button>";
+      }).join("") + "</div>";
+  }
+  var html = '<div class="side-head"><a class="brand" href="../"><span class="brand-mark">M</span><span class="brand-text"><b>MCPsight</b><small>Documentation</small></span></a>' + themeSwitch() + "</div>" +
     '<button class="search-btn" type="button" data-search><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search<kbd>⌘K</kbd></button>' +
     '<nav class="nav" aria-label="Documentation">';
   NAV.forEach(function (g) {
@@ -87,18 +93,15 @@
       html += '<a href="' + p[0] + '"' + (p[0] === here ? ' aria-current="page"' : "") + ">" + esc(p[1]) + "</a>";
     });
   });
-  html += '</nav><div class="side-foot"><a href="' + REPO + '">GitHub</a><div class="theme" role="group" aria-label="Theme">' +
-    ["light", "system", "dark"].map(function (t) {
-      return '<button type="button" data-t="' + t + '" aria-label="' + t + ' theme" aria-pressed="false">' + ICONS[t] + "</button>";
-    }).join("") + "</div></div>";
+  html += '</nav><div class="side-foot"><a href="' + REPO + '">GitHub</a><a href="../">MCPsight home</a></div>';
   side.innerHTML = html;
-  side.querySelectorAll(".theme button").forEach(function (b) { b.onclick = function () { setTheme(b.dataset.t, true); }; });
-  setTheme(getTheme());
 
   var top = el("div", { class: "topbar" },
     '<button type="button" data-menu aria-label="Open navigation">Menu</button><b>MCPsight docs</b>' +
-    '<button type="button" data-search style="margin-left:auto">Search</button>');
+    '<button type="button" data-search style="margin-left:auto">Search</button>' + themeSwitch());
   document.body.insertBefore(top, document.body.firstChild);
+  document.querySelectorAll(".theme button").forEach(function (b) { b.onclick = function () { setTheme(b.dataset.t, true); }; });
+  setTheme(getTheme());
   top.querySelector("[data-menu]").onclick = function () { side.classList.toggle("open"); };
   document.addEventListener("click", function (e) {
     if (side.classList.contains("open") && !side.contains(e.target) && !e.target.closest("[data-menu]")) side.classList.remove("open");
