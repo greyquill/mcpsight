@@ -68,8 +68,9 @@
     dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'
   };
   function getTheme() { try { return localStorage.getItem("mcpsight.theme") || "system"; } catch (e) { return "system"; } }
-  function setTheme(t) {
-    try { localStorage.setItem("mcpsight.theme", t); } catch (e) {}
+  // Only an explicit click is remembered; until then the page follows the OS.
+  function setTheme(t, save) {
+    if (save) { try { localStorage.setItem("mcpsight.theme", t); } catch (e) {} }
     if (t === "system") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
     document.querySelectorAll(".theme button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.t === t)); });
@@ -91,7 +92,7 @@
       return '<button type="button" data-t="' + t + '" aria-label="' + t + ' theme" aria-pressed="false">' + ICONS[t] + "</button>";
     }).join("") + "</div></div>";
   side.innerHTML = html;
-  side.querySelectorAll(".theme button").forEach(function (b) { b.onclick = function () { setTheme(b.dataset.t); }; });
+  side.querySelectorAll(".theme button").forEach(function (b) { b.onclick = function () { setTheme(b.dataset.t, true); }; });
   setTheme(getTheme());
 
   var top = el("div", { class: "topbar" },
