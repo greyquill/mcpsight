@@ -68,12 +68,11 @@ homebrew_casks:
     # Until the tap exists and its token is set, build the cask but do not push it.
     skip_upload: '{{ if not (index .Env "HOMEBREW_TAP_TOKEN") }}true{{ end }}'
     # The binaries are not notarized, so clear Gatekeeper's quarantine flag.
-    hooks:
-      post:
-        install: |
-          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/mcpsight"]
-          end
+    # Homebrew 7 deprecates postflight blocks; install steps replace them.
+    custom_block: |
+      postflight_steps do
+        run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "mcpsight"], chdir: ".", must_succeed: false
+      end
 
 changelog:
   use: github
