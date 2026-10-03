@@ -81,14 +81,17 @@ namespaced `<analyzer>.<rule>`.
 | `drift.capability_escalated`: e.g. `fs:read → fs:write`, new `path` param | **high** | Rug-pull |
 | `drift.tool_added`: a new tool appeared | **medium** | Expanded surface |
 | `drift.schema_changed`: input schema changed | **low** | Change awareness |
+| `drift.description_changed`: wording changed without gaining an instruction | **low** | Change awareness |
+| `drift.tool_removed`: a tool disappeared | **info** | Reduced surface |
 | `drift.description_shortened`: text removed only | **info** | Noise |
+| `drift.server_version_changed`: reported version differs from the baseline | **info** | Awareness |
 
 ### Supply chain
 | Rule | Default severity | Threat |
 |---|---|---|
 | `supplychain.install_script`: `postinstall`/lifecycle script present | **high** | Arbitrary code on install |
 | `supplychain.typosquat`: name near a popular package, or its name under another scope | **high** | Impersonation |
-| `supplychain.known_cve`: dependency with a known OSV advisory | **high**/**medium** (by CVSS) | Known-vulnerable dep |
+| `supplychain.known_cve`: the package has a known OSV advisory | **high**/**medium** (by CVSS) | Known-vulnerable package |
 | `supplychain.no_source`: no resolvable/ matching source repo | **medium** | Unauditable |
 | `supplychain.single_maintainer`: one publisher | **low** | Bus-factor / account takeover |
 | `supplychain.young_package`: first published very recently | **low** | Typosquat vehicle / immaturity |

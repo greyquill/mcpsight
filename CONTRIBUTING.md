@@ -34,7 +34,7 @@ internal/manifest/    canonicalization, hashing, diffing (the drift spine)
 internal/analyze/*    one package per analyzer  ── see docs/analyzers/README.md
 internal/score/       the rubric implementation  ── see docs/rubric.md
 internal/render/      terminal / json / sarif / markdown
-internal/store/       sqlite baselines (local) + postgres (index)
+internal/store/       baselines in .mcpsight/baseline.json (local) + postgres (index)
 testdata/servers/     deliberately malicious fixtures (the spec)
 ```
 
