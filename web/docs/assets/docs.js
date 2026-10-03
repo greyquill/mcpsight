@@ -93,7 +93,7 @@
       html += '<a href="' + p[0] + '"' + (p[0] === here ? ' aria-current="page"' : "") + ">" + esc(p[1]) + "</a>";
     });
   });
-  html += '</nav><div class="side-foot"><a href="' + REPO + '">GitHub</a><a href="../">MCPsight home</a></div>';
+  html += '</nav><div class="side-foot"><a href="' + REPO + '">GitHub</a><a href="../privacy/">Privacy</a><a href="../">MCPsight home</a></div>';
   side.innerHTML = html;
 
   var top = el("div", { class: "topbar" },

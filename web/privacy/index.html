@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · MCPsight</title>
+<meta name="description" content="What mcpsight.dev and the MCPsight CLI collect, and what they do not.">
+<link rel="canonical" href="https://mcpsight.dev/privacy/">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script src="../assets/analytics.js" defer></script>
+<style>
+:root{--bg:#F7F9FB;--ink:#0F2436;--ink2:#4A5D6E;--ink3:#7C8C9A;--line:#DCE3EA;--link:#0B4F88;--code:#F1F5F9;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1620;--ink:#E3EBF2;--ink2:#A3B3C1;--ink3:#71838F;--line:#1F3346;--link:#7FB6E6;--code:#0A1520;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B1620;--ink:#E3EBF2;--ink2:#A3B3C1;--ink3:#71838F;--line:#1F3346;--link:#7FB6E6;--code:#0A1520;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "DM Sans",system-ui,-apple-system,sans-serif}
+main{max-width:760px;margin:0 auto;padding:36px 16px 80px}
+a{color:var(--link)}
+.logo img{display:block;height:28px;width:auto}
+.logo-dark{display:none!important}
+:root[data-theme="dark"] .logo-light{display:none!important}:root[data-theme="dark"] .logo-dark{display:block!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .logo-light{display:none!important}:root:not([data-theme="light"]) .logo-dark{display:block!important}}
+h1{font-size:34px;letter-spacing:-.02em;margin:40px 0 6px}
+.meta{color:var(--ink3);font-size:14px;margin:0 0 28px}
+h2{font-size:21px;margin:34px 0 8px}
+li{margin:6px 0}
+code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.9em}
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink3);font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<a class="logo" href="../" aria-label="MCPsight home"><img class="logo-light" src="../brand/lockup.svg" alt="mcpsight" width="127" height="28"><img class="logo-dark" src="../brand/lockup-dark.svg" alt="" width="127" height="28"></a>
+
+<h1>Privacy</h1>
+<p class="meta">Last updated 3 October 2026</p>
+
+<p>This page covers the website at mcpsight.dev. The MCPsight command-line tool is covered at the end.</p>
+
+<h2>What this website collects</h2>
+<p>We use Google Analytics to count visits. It tells us which pages people read, roughly where they are (country and city), which site sent them, and what kind of device and browser they use. Google Analytics does not give us your name, email address, or IP address, and we do not try to identify you.</p>
+<p>Google Analytics sets cookies named <code>_ga</code> and <code>_ga_SPJPW7S0HT</code> to tell visits apart. They last up to two years. You can block them with your browser settings or a content blocker, and the site works the same without them. Google's own policy is at <a href="https://policies.google.com/privacy">policies.google.com/privacy</a>.</p>
+
+<h2>What else sees your visit</h2>
+<ul>
+<li>GitHub Pages hosts the site and keeps standard server logs, including IP addresses. See <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>.</li>
+<li>Fonts load from Google Fonts, which receives your IP address when the page loads.</li>
+<li>Your theme choice is kept in your own browser's storage and never leaves your device.</li>
+</ul>
+
+<h2>The MCPsight CLI</h2>
+<p>The command-line tool sends no telemetry. It contacts nothing except the servers you ask it to scan, and, for package scans, OSV.dev and the npm or PyPI registry. <code>--offline</code> turns those lookups off.</p>
+
+<h2>Questions</h2>
+<p>Write to <a href="mailto:contact@greyquill.io">contact@greyquill.io</a>. MCPsight is made by Greyquill Software Private Limited.</p>
+
+<footer><a href="../">MCPsight</a> · <a href="../docs/">Docs</a> · <a href="https://github.com/greyquill/mcpsight">GitHub</a></footer>
+</main>
+</body>
+</html>
