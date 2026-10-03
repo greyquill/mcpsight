@@ -46,11 +46,13 @@ a{color:var(--link);text-underline-offset:3px}
 /* Sidebar */
 .side-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:16px 14px 12px 18px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);min-width:0}
-.brand-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--navy),var(--sky));display:grid;place-items:center;color:#fff;font:600 13px var(--mono)}
-:root[data-theme="dark"] .brand-mark{color:#0B1620}
 .brand b{font-size:15px;letter-spacing:-.01em}
-.brand-text b{display:block}
-.brand small{display:block;font-size:12px;color:var(--ink3);font-weight:400}
+.brand img{display:block;height:26px;width:auto}
+.brand small{font-size:12px;color:var(--ink3);padding-top:7px}
+.top-logo img{display:block}
+.logo-dark{display:none!important}
+:root[data-theme="dark"] .logo-light{display:none!important}:root[data-theme="dark"] .logo-dark{display:block!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .logo-light{display:none!important}:root:not([data-theme="light"]) .logo-dark{display:block!important}}
 .search-btn{display:flex;align-items:center;gap:8px;margin:4px 14px 10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink3);font:inherit;font-size:14px;cursor:pointer;text-align:left}
 .search-btn:hover{border-color:var(--sky)}
 .search-btn kbd{margin-left:auto;font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--ink3)}

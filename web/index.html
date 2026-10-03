@@ -7,6 +7,7 @@
 <meta name="description" content="MCPsight is an open-source scanner for MCP servers. It catches prompt injection, watches local servers in a sandbox, and fails your build when a server changes. By Greyquill.">
 <link rel="canonical" href="https://mcpsight.dev/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MCPsight">
 <meta property="og:title" content="MCPsight by Greyquill">
@@ -53,9 +54,11 @@ a{color:inherit}
 .nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .nav .wrap{display:flex;align-items:center;gap:24px;height:64px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#083D6A,#5A9FD4);display:grid;place-items:center;color:#fff;font:700 15px var(--mono)}
-.logo b{display:block;font-size:16px;letter-spacing:-.01em;line-height:1.1}
-.logo small{display:block;font-size:11.5px;color:var(--ink3);line-height:1.2}
+.logo img{display:block;height:30px;width:auto}
+.logo small{font-size:12px;color:var(--ink3);line-height:1;padding-top:6px;white-space:nowrap}
+.logo-dark{display:none!important}
+:root[data-theme="dark"] .logo-light{display:none!important}:root[data-theme="dark"] .logo-dark{display:block!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .logo-light{display:none!important}:root:not([data-theme="light"]) .logo-dark{display:block!important}}
 .links{display:flex;gap:26px;margin:0 auto;font-size:14.5px}
 .links a{text-decoration:none;color:var(--ink2)}
 .links a:hover{color:var(--ink)}
@@ -160,7 +163,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 40px;font-size:14.5px}
 </head>
 <body>
 <header class="nav"><div class="wrap">
-  <a class="logo" href="./"><span class="mark">M</span><span><b>MCPsight</b><small>by Greyquill</small></span></a>
+  <a class="logo" href="./" aria-label="MCPsight home"><img class="logo-light" src="brand/lockup.svg" alt="mcpsight" width="136" height="30"><img class="logo-dark" src="brand/lockup-dark.svg" alt="" width="136" height="30"><small>by Greyquill</small></a>
   <nav class="links" aria-label="Main">
     <a href="#features">Features</a><a href="#how">How it works</a><a href="docs/">Docs</a><a href="https://github.com/greyquill/mcpsight">GitHub</a>
   </nav>
@@ -299,7 +302,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 40px;font-size:14.5px}
 
 <footer><div class="wrap">
   <div class="foot">
-    <div><a class="logo" href="./"><span class="mark">M</span><span><b>MCPsight</b><small>by Greyquill</small></span></a>
+    <div><a class="logo" href="./" aria-label="MCPsight home"><img class="logo-light" src="brand/lockup.svg" alt="mcpsight" width="136" height="30"><img class="logo-dark" src="brand/lockup-dark.svg" alt="" width="136" height="30"><small>by Greyquill</small></a>
       <p>Inspect an MCP server before you trust it: what it costs, what it can reach, and whether it changed.</p></div>
     <div><h4>Product</h4><a href="docs/">Documentation</a><a href="docs/install.html">Install</a><a href="docs/rules.html">Every rule</a><a href="https://github.com/greyquill/mcpsight/releases">Releases</a></div>
     <div><h4>Security</h4><a href="docs/protection.html">What it protects you from</a><a href="docs/verify-download.html">Verify a download</a><a href="docs/report-vulnerability.html">Report a vulnerability</a><a href="mailto:contact@greyquill.io?subject=MCPsight%20security">contact@greyquill.io</a></div>

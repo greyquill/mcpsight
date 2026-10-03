@@ -1,4 +1,11 @@
-<h1 align="center">mcpsight</h1>
+<h1 align="center">
+  <a href="https://mcpsight.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="web/brand/lockup-dark.svg">
+      <img src="web/brand/lockup.svg" alt="mcpsight" width="236" height="52">
+    </picture>
+  </a>
+</h1>
 
 <p align="center"><strong>An X-ray machine for MCP servers.</strong></p>
 

@@ -84,7 +84,7 @@
         return '<button type="button" data-t="' + t + '" aria-label="' + t + ' theme" title="' + t.charAt(0).toUpperCase() + t.slice(1) + '" aria-pressed="false">' + ICONS[t] + "</button>";
       }).join("") + "</div>";
   }
-  var html = '<div class="side-head"><a class="brand" href="../"><span class="brand-mark">M</span><span class="brand-text"><b>MCPsight</b><small>Documentation</small></span></a>' + themeSwitch() + "</div>" +
+  var html = '<div class="side-head"><a class="brand" href="../" aria-label="MCPsight home"><img class="logo-light" src="../brand/lockup.svg" alt="mcpsight" width="118" height="26"><img class="logo-dark" src="../brand/lockup-dark.svg" alt="" width="118" height="26"></a>' + themeSwitch() + "</div>" +
     '<button class="search-btn" type="button" data-search><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search<kbd>⌘K</kbd></button>' +
     '<nav class="nav" aria-label="Documentation">';
   NAV.forEach(function (g) {
@@ -97,7 +97,7 @@
   side.innerHTML = html;
 
   var top = el("div", { class: "topbar" },
-    '<button type="button" data-menu aria-label="Open navigation">Menu</button><b>MCPsight docs</b>' +
+    '<button type="button" data-menu aria-label="Open navigation">Menu</button><a class="top-logo" href="../" aria-label="MCPsight home"><img class="logo-light" src="../brand/mark.svg" alt="" width="26" height="26"><img class="logo-dark" src="../brand/mark-dark.svg" alt="" width="26" height="26"></a><b>Docs</b>' +
     '<button type="button" data-search style="margin-left:auto">Search</button>' + themeSwitch());
   document.body.insertBefore(top, document.body.firstChild);
   document.querySelectorAll(".theme button").forEach(function (b) { b.onclick = function () { setTheme(b.dataset.t, true); }; });
