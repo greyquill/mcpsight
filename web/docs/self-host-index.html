@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run the registry index · MCPsight docs</title>
+<meta name="description" content="Run mcpsight-index to grade a whole MCP registry with the same analyzers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Self-host</p>
+<h1>Run the registry index</h1>
+<p class="lede"><code>mcpsight-index</code> runs the same analyzers over a whole registry and publishes the results as a static site. Any grade it shows, you can reproduce with the CLI.</p>
+<div class="callout"><strong>The public index is not published yet.</strong><p>Maintainers will hear from us before any grade goes public. Until then you can run your own.</p></div>
+<h2>Preview the site</h2><pre data-kind="cmd">make preview     # no database, opens your browser</pre>
+<h2>Run it with Docker</h2><p>Postgres and the service together:</p><pre data-kind="cmd">docker compose -f deploy/docker-compose.yml up --build     # http://localhost:8080</pre>
+<p>A Helm chart is in <a href="https://github.com/greyquill/mcpsight/tree/main/deploy/helm">deploy/helm</a>. Postgres can be any Postgres: a container, RDS, or Cloud SQL.</p><h2>Populate and publish</h2><pre data-kind="cmd">mcpsight-index migrate
+mcpsight-index scan-batch --seed testdata/index-seed.json
+mcpsight-index snapshot -o web/data/snapshot.json</pre>
+<p>The site reads <code>web/data/snapshot.json</code>. Until one exists, it shows a "coming soon" page.</p><h2>Commands</h2><div class="table"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody><tr><td><code>migrate</code></td><td>Create or update the database schema</td></tr><tr><td><code>crawl</code></td><td>List servers from the official registry or a seed file</td></tr><tr><td><code>scan-batch</code></td><td>Scan the servers and store the results</td></tr><tr><td><code>snapshot</code></td><td>Write the JSON the static site reads</td></tr><tr><td><code>serve</code></td><td>Run the JSON API and serve the site</td></tr><tr><td><code>preview</code></td><td>Serve the static site with no database</td></tr></tbody></table></div>
+<h2>Configuration</h2><p>Environment variables only:</p><div class="table"><table><thead><tr><th>Variable</th><th>Default</th><th>Meaning</th></tr></thead><tbody><tr><td><code>MCPSIGHT_DSN</code></td><td></td><td>Postgres connection string. <code>DATABASE_URL</code> works too</td></tr><tr><td><code>MCPSIGHT_ADDR</code></td><td><code>:8080</code></td><td>Listen address</td></tr><tr><td><code>MCPSIGHT_WEB</code></td><td><code>web</code></td><td>Folder holding the static site</td></tr></tbody></table></div>
+<div class="callout"><strong>Local servers need the sandbox.</strong><p>The service image is minimal and scans remote servers only. Run <code>scan-batch</code> on a Linux host with bubblewrap, pointed at the same database.</p></div>
+</article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How scoring works · MCPsight docs</title>
+<meta name="description" content="The MCPsight scoring rubric: penalties, the critical cap, and grade bands.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Reference</p>
+<h1>How scoring works</h1>
+<p class="lede">Every grade comes from a published, versioned rubric. You can redo any score by hand from the findings in the report.</p>
+<h2>The sum</h2><p>A server starts at 100. Each finding subtracts a penalty by severity:</p><div class="table"><table><thead><tr><th>Severity</th><th>Penalty</th></tr></thead><tbody><tr><td><span class="sev critical">critical</span></td><td>40</td></tr><tr><td><span class="sev high">high</span></td><td>20</td></tr><tr><td><span class="sev medium">medium</span></td><td>8</td></tr><tr><td><span class="sev low">low</span></td><td>3</td></tr><tr><td><span class="sev info">info</span></td><td>0</td></tr></tbody></table></div>
+<pre data-kind="file" data-label="Formula">score = clamp(100 - sum of penalties, 0, 100)</pre>
+<p>Each rule counts at most once per tool, so one systemic problem cannot subtract twenty times.</p><h2>One critical finding means F</h2><p>Any critical finding caps the score at 39, which is an F, whatever else the server gets right. A server that reads your SSH key on startup does not deserve a D for good manners elsewhere. The grade line says <b>capped by a critical finding</b> when this happens.</p><h2>Grades</h2><div class="table"><table><thead><tr><th>Grade</th><th>Score</th></tr></thead><tbody><tr><td>A</td><td>90 to 100</td></tr><tr><td>B</td><td>75 to 89</td></tr><tr><td>C</td><td>60 to 74</td></tr><tr><td>D</td><td>40 to 59</td></tr><tr><td>F</td><td>0 to 39</td></tr></tbody></table></div>
+<h2>A worked example</h2><p>A remote server that lists its tools without authentication (high, minus 20) and carries a base64 blob in one description (medium, minus 8) scores 100 minus 20 minus 8, which is 72, a C. Add a decoy credential read (critical) and the cap holds it at 39, an F.</p><h2>Versions</h2><p>Every report records the MCPsight version and the rubric version that produced it. When the rubric changes, its version goes up and old grades keep their meaning. Nothing is silently re-graded. The full rubric is in <a href="https://github.com/greyquill/mcpsight/blob/main/docs/rubric.md">docs/rubric.md</a>.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

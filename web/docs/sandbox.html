@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Linux sandbox · MCPsight docs</title>
+<meta name="description" content="How MCPsight runs local MCP servers in a bubblewrap sandbox with decoy credentials.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Walkthrough</p>
+<h1>The Linux sandbox</h1>
+<p class="lede">This is where MCPsight watches what a server does, not only what it says. It runs local servers inside bubblewrap, with a fake home folder full of decoy credentials, and records every file they open and every connection they try.</p>
+<h2>What the sandbox does</h2><ul><li><b>No network</b> for local commands. Connection attempts are recorded. <code>--allow-net</code> opens it for servers that need it to start.</li><li><b>No access to your files.</b> The server sees a throwaway filesystem, plus its own code, read-only.</li><li><b>A decoy home.</b> <code>~/.ssh/id_rsa</code>, <code>~/.aws/credentials</code>, and <code>.env</code> are fakes. Reading any of them is a critical finding.</li><li><b>Limits</b> on memory, CPU time, open files, file size, processes, and time. A runaway server is killed and your machine stays healthy.</li><li><b>A clean environment.</b> Your environment variables never reach the server.</li></ul><h2>Try it</h2><p>You need Linux with bubblewrap, strace, and Node. From the repo, scan three practice servers. A local command goes through a config file:</p><pre data-kind="cmd">make build
+for f in benign-docs credential-thief egress-on-init; do
+  printf '{"mcpServers":{"%s":{"command":"node","args":["%s"]}}}' \
+    "$f" "$PWD/testdata/servers/$f/server.js" &gt; /tmp/$f.json
+  ./bin/mcpsight scan --offline --from /tmp/$f.json
+done</pre>
+<h3>A server that steals credentials</h3><pre data-kind="out" data-label="credential-thief">  credential-thief
+  Server        credential-thief  (2.0.1, via bubblewrap)
+  Grade         F  (39/100, capped by a critical finding)  rubric v1
+
+  Context cost  ~75 tokens  (1 tool)   under $0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  none declared
+  Drift         baseline recorded (first scan)
+
+  Findings
+  CRITICAL  Server read decoy credential files on startup [capability.decoy_read]
+      During the probe the server read the decoy credential file(s): .ssh/id_rsa,
+      .aws/credentials, .env. A server that reads credential files on startup is
+      exfiltrating, not initializing.
+      fix: Do not install this server. Report it to the registry it came from.
+
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif
+</pre>
+<p>It read the decoys the moment it started. Your real keys were never inside the sandbox.</p><h3>A server that phones home</h3><pre data-kind="out" data-label="egress-on-init">  egress-on-init
+  Server        egress-on-init  (1.0.0, via bubblewrap)
+  Grade         C  (60/100)  rubric v1
+
+  Context cost  ~108 tokens  (1 tool)   under $0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  none declared
+  Drift         baseline recorded (first scan)
+
+  Findings
+  HIGH      Server attempted network egress on startup [capability.egress_unexpected]
+      The server tried to reach 203.0.113.7:443 during startup, with the network
+      denied. It should not need the network to list its tools.
+      fix: Investigate why the server connects out on startup before trusting it.
+  HIGH      Observed network egress exceeds declared capability [capability.declared_observed_gap]
+      The server contacted the network but none of its tools declare a net:egress
+      capability. Observed behavior exceeding the declared surface is a red flag.
+      fix: Treat the undeclared capability as the true capability of the server.
+
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif
+</pre>
+<p>None of its tools say they need the network, yet it connected out on startup. That gap is the signal.</p><h3>An honest server</h3><pre data-kind="out" data-label="benign-docs">  benign-docs
+  Server        benign-docs  (1.2.0, via bubblewrap)
+  Grade         A  (100/100)  rubric v1
+
+  Context cost  ~229 tokens  (2 tools)   ~$0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  none declared
+  Drift         baseline recorded (first scan)
+
+  No findings.
+
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif
+</pre>
+<h2>A real package</h2><p>Package servers download inside the sandbox, so they need the network:</p><pre data-kind="cmd">mcpsight scan npx:@modelcontextprotocol/server-everything</pre>
+<pre data-kind="out" data-label="Output">  mcp-servers/everything
+  Server        mcp-servers/everything  (2.0.0, via bubblewrap)
+  Grade         A  (100/100)  rubric v1
+
+  Context cost  ~2,186 tokens  (13 tools)   ~$0.007 per request @ Claude Sonnet  (est.)
+  Capabilities  fs:write  net:egress
+  Drift         baseline recorded (first scan)
+
+  Findings
+  INFO      Declares fs:write capability [capability.declared_fs_write]
+      tool: gzip-file-as-resource
+      Tool "gzip-file-as-resource" appears to declare the fs:write capability from
+      its name, description, or schema.
+
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif
+</pre>
+<h2>Limits you should know</h2><ul><li><code>npx:</code> and <code>uvx:</code> servers run with the network on, because the package manager has to fetch them. So connection findings only fire for local commands, where the network was off and nothing else could have connected.</li><li>Watching uses strace. Code written to dodge strace can hide what it does. A stronger watcher is designed but not built yet.</li><li>Without strace, the sandbox still contains the server, but the report shows <code>capability.not_observed</code> and marks the grade <b>behavior not observed</b>.</li></ul><p>More in <a href="protection.html">What MCPsight protects you from</a>.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview · MCPsight docs</title>
+<meta name="description" content="MCPsight inspects an MCP server before you trust it: token cost, what it can reach, and whether it changed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Get started</p>
+<h1>Overview</h1>
+<p class="lede">MCPsight inspects an MCP server before you trust it. One command tells you what the server costs in tokens, what it can reach, and whether it changed since you last looked.</p>
+<h2>Why it exists</h2><p>An MCP server hands your AI agent a list of tools. The model reads every tool description, and you usually never do. A description can tell the model to read your SSH key. A server can pass review today and ship a different description next week. MCPsight reads what the model reads, runs local servers in a sandbox to see what they actually do, and keeps a baseline so a change cannot slip past you.</p><h2>Quick start</h2><ol class="steps"><li><b>Install it.</b><pre data-kind="cmd">brew install --cask greyquill/tap/mcpsight</pre>
+<p>Linux, Windows, and Go installs are on the <a href="install.html">Install</a> page.</p></li><li><b>Scan the servers you already use.</b><pre data-kind="cmd">mcpsight scan --from claude_desktop_config.json</pre>
+<p>Or scan one remote server by its URL: <code>mcpsight scan https://mcp.example.com/mcp</code>.</p></li><li><b>Gate changes in CI.</b><pre data-kind="cmd">mcpsight verify --from .mcp.json --offline</pre>
+<p>This fails the build when a server changed since the baseline you committed. See <a href="ci.html">Gate pull requests</a>.</p></li></ol><h2>What it checks</h2><div class="cards"><a class="card" href="rules.html#context-cost"><b>Context cost</b><span>Tokens your tool definitions add to every request, per tool.</span></a><a class="card" href="rules.html#capability"><b>Capabilities</b><span>What the tools claim they can do, and what the server actually did in the sandbox.</span></a><a class="card" href="rules.html#injection"><b>Injection</b><span>Descriptions that try to steer the model, hide text, or call other tools.</span></a><a class="card" href="rules.html#drift"><b>Drift</b><span>Changes since your baseline, graded by how dangerous they are.</span></a><a class="card" href="rules.html#supply-chain"><b>Supply chain</b><span>Known CVEs, install scripts, typosquats, missing source.</span></a><a class="card" href="rules.html#auth-posture"><b>Auth posture</b><span>Remote servers that list tools to anyone, or speak plain HTTP.</span></a></div>
+<h2>How it works</h2><p>MCPsight connects to a server the way an agent does. It completes the handshake and reads the tools, resources, and prompts. Six analyzers read that result. Each problem becomes a finding with a stable rule ID, a severity, and a fix. The findings add up to a score out of 100 under a <a href="scoring.html">published rubric</a>.</p><p>Local servers (<code>npx:</code>, <code>uvx:</code>, or a command) are other people's code, so MCPsight only runs them inside a sandbox on Linux. Remote servers run nothing on your machine and scan from any OS.</p><div class="callout"><strong>No account, no API key.</strong><p>The checks are plain rules that run offline. Nothing is sent anywhere, except package lookups to OSV.dev and the npm or PyPI registry for supply-chain checks. <code>--offline</code> turns those off.</p></div>
+<h2>Where to go next</h2><div class="cards"><a class="card" href="first-scan.html"><b>Your first scan</b><span>Scan a server and see what the report says.</span></a><a class="card" href="practice-servers.html"><b>Try the practice servers</b><span>Watch MCPsight catch a poisoned server and a rug pull, safely.</span></a><a class="card" href="ci.html"><b>Gate pull requests</b><span>A ready GitHub Actions workflow.</span></a><a class="card" href="rules.html"><b>Every rule</b><span>What each finding means and how much it costs.</span></a></div>
+</article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

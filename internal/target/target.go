@@ -61,7 +61,7 @@ func (t Target) MarshalJSON() ([]byte, error) {
 // sandbox).
 func (t Target) Stdio() bool { return t.Kind != KindRemote }
 
-// Resolve parses a single target string of the forms documented in MANUAL.md:
+// Resolve parses a single target string of the forms documented in web/docs/commands.html:
 //
 //	npx:@scope/name@1.2.3
 //	uvx:some-mcp-server

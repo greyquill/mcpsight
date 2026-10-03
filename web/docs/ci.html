@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gate pull requests · MCPsight docs</title>
+<meta name="description" content="Run MCPsight in GitHub Actions to fail pull requests when an MCP server changes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Use it in CI</p>
+<h1>Gate pull requests</h1>
+<p class="lede">Put MCPsight in the pipeline of any repo whose agents use MCP. The job fails when a server changed since the baseline you committed, and the findings appear on the pull request.</p>
+<h2>Before you start</h2><ol><li>Run <code>mcpsight scan --from .mcp.json</code> once on your machine.</li><li>Commit <code>.mcpsight/baseline.json</code>. Without it, <code>verify</code> exits 2 and has nothing to compare against.</li></ol><h2>GitHub Actions</h2><pre data-kind="file" data-label=".github/workflows/mcpsight.yml">name: mcpsight
+on: [pull_request]
+
+permissions:
+  contents: read
+  security-events: write   # to upload SARIF
+
+jobs:
+  mcpsight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.26' }
+      - run: go install github.com/greyquill/mcpsight/cmd/mcpsight@latest
+
+      # Only needed to scan local (npx, uvx, command) servers.
+      - run: sudo apt-get update &amp;&amp; sudo apt-get install -y bubblewrap strace
+
+      # Fails the job if any server changed since the committed baseline.
+      - name: Verify MCP servers
+        run: mcpsight verify --from .mcp.json --offline
+
+      # Writes .mcpsight/report.sarif for code scanning, even if verify failed.
+      - name: Scan for the SARIF report
+        if: always()
+        run: mcpsight scan --from .mcp.json || true
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: .mcpsight/report.sarif</pre>
+<p><code>verify</code> only checks for drift, so <code>--offline</code> costs nothing and keeps the gate fast and repeatable.</p><h2>When the job fails</h2><p>Read the drift findings first. If the change is expected, accept it in the same pull request:</p><pre data-kind="cmd">mcpsight scan --update-baseline --from .mcp.json
+git add .mcpsight/baseline.json</pre>
+<p>The baseline diff is the review. Someone has to look at it before it merges.</p><h2>Choose what fails the build</h2><p><code>scan</code> exits 1 when a finding is at or above <code>--fail-on</code>, which is <code>high</code> by default. Use <code>--fail-on critical</code> to block only the worst. See <a href="exit-codes.html">Exit codes</a>.</p><div class="callout warn"><strong>Scanning local servers on <code>ubuntu-latest</code>?</strong><p>Ubuntu 24.04 blocks bubblewrap by default. Add the AppArmor profile from <a href="troubleshooting.html#ubuntu-24-04-blocks-bubblewrap">Troubleshooting</a> as a step before the scan. Remote-only scans do not need it.</p></div>
+</article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

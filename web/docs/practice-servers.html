@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Try it with the practice servers · MCPsight docs</title>
+<meta name="description" content="Set up the MCPsight practice servers to see every check fire safely.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Walkthrough</p>
+<h1>Try it with the practice servers</h1>
+<p class="lede">The repo ships a practice server that pretends to be several MCP servers at once. It only returns tool descriptions and never runs anything, so it is safe on any machine.</p>
+<h2>What you need</h2><ul><li>MCPsight installed.</li><li>Go 1.26 or later, to run the practice server.</li><li>Two terminals: one runs the practice server, one runs scans.</li></ul><p>The walkthrough takes about half an hour, and everything stays on your machine. Only <a href="sandbox.html">The Linux sandbox</a> needs Linux.</p><h2>Start the practice server</h2><p>In the first terminal:</p><pre data-kind="cmd">git clone https://github.com/greyquill/mcpsight &amp;&amp; cd mcpsight
+make fixture     # serves on 127.0.0.1:8931</pre>
+<p>Leave it running. Each URL is a different server:</p><div class="table"><table><thead><tr><th>URL</th><th>Pretends to be</th></tr></thead><tbody><tr><td><code>/clean</code></td><td>A well-behaved documentation server</td></tr><tr><td><code>/poisoned</code></td><td>A server whose tool descriptions carry prompt injection</td></tr><tr><td><code>/rugpull</code></td><td>A server that starts clean, then turns malicious when you flip a switch</td></tr><tr><td><code>/auth/clean</code></td><td>The clean server, behind a bearer token</td></tr></tbody></table></div>
+<h2>Set up the second terminal</h2><p>Work from a scratch folder, so the scan files stay out of the repo:</p><pre data-kind="cmd">mkdir -p /tmp/mcpsight-demo &amp;&amp; cd /tmp/mcpsight-demo</pre>
+<p>Then start with <a href="poisoned-server.html">Spot a poisoned server</a>.</p><h2>When you are done</h2><p>Stop the practice server with <kbd>Ctrl</kbd>+<kbd>C</kbd> and delete <code>/tmp/mcpsight-demo</code>.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

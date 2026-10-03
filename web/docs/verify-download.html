@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify a download · MCPsight docs</title>
+<meta name="description" content="Check that an MCPsight release came from Greyquill&#x27;s release workflow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Security</p>
+<h1>Verify a download</h1>
+<p class="lede">You are about to run a tool that runs other people's code, so check it first. Every release is signed by our release workflow.</p>
+<h2>With cosign</h2><p>Download <code>checksums.txt</code>, <code>checksums.txt.sig</code>, and <code>checksums.txt.pem</code> from the release, next to your archive. With <a href="https://docs.sigstore.dev/cosign/system_config/installation/">cosign</a> installed:</p><pre data-kind="cmd">cosign verify-blob checksums.txt \
+  --signature checksums.txt.sig --certificate checksums.txt.pem \
+  --certificate-identity-regexp '^https://github.com/greyquill/mcpsight/\.github/workflows/release\.yml@' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+shasum -a 256 --ignore-missing -c checksums.txt</pre>
+<p>Both must pass. The first proves <code>checksums.txt</code> came from our release workflow. The second proves your archive matches it.</p><h2>With the GitHub CLI</h2><p>One command checks the archive's build provenance:</p><pre data-kind="cmd">gh attestation verify mcpsight_*_darwin_arm64.tar.gz --repo greyquill/mcpsight</pre>
+<p>Homebrew checks the archive's checksum for you.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

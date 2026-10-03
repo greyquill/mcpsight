@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What MCPsight protects you from · MCPsight docs</title>
+<meta name="description" content="The threats MCPsight checks for, how, and what it does not claim to catch.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Security</p>
+<h1>What MCPsight protects you from</h1>
+<p class="lede">MCPsight looks for the ways an MCP server can hurt you. It is honest about where it stops.</p>
+<h2>Threats and checks</h2><div class="table"><table><thead><tr><th>What an attacker wants</th><th>How</th><th>What catches it</th></tr></thead><tbody><tr><td>Your credentials</td><td>Reads <code>~/.ssh/id_rsa</code> and similar on startup</td><td>Decoy files in the sandbox, a critical finding</td></tr><tr><td>Your data</td><td>Connects out on startup</td><td>Recorded connection attempts, and the gap between declared and observed</td></tr><tr><td>Control of your agent</td><td>Orders hidden in a tool description</td><td>Injection rules</td></tr><tr><td>Your other tools</td><td>A description that drives tools on another server</td><td>Cross-tool rule</td></tr><tr><td>To slip past review</td><td>Invisible characters, look-alike letters, base64</td><td>Invisible-character and encoded-payload checks</td></tr><tr><td>Your trust, later</td><td>A clean server that changes after you adopt it</td><td>Drift against your committed baseline</td></tr><tr><td>To be installed by mistake</td><td>A name close to a popular package</td><td>Typosquat check</td></tr><tr><td>Code you cannot audit</td><td>No source, install scripts, known CVEs</td><td>Supply-chain checks</td></tr><tr><td>An open door</td><td>A remote server that lists tools to anyone, or plain HTTP</td><td>Auth-posture checks</td></tr></tbody></table></div>
+<h2>MCPsight itself is hardened</h2><ul><li>Local servers only run in the sandbox. If there is no sandbox, the scan is refused.</li><li>Your environment variables and home folder never reach the server.</li><li>Header and environment values are redacted from reports.</li><li>Messages from a server are capped at 16 MiB, and its text is escaped before it reaches your terminal or a Markdown comment.</li></ul><h2>What it does not claim</h2><ul><li><b>It is not a malware scanner.</b> It finds risk and change. It cannot prove a server is safe.</li><li>Code written to dodge strace can hide what it does.</li><li><code>npx:</code> and <code>uvx:</code> servers start with the network on, so connection findings do not fire for them.</li><li>Injection rules are patterns. A new trick can get past them until a rule is added.</li><li>Token counts are estimates.</li></ul><p>The full statement is the <a href="https://github.com/greyquill/mcpsight/blob/main/docs/threat-model.md">threat model</a>.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

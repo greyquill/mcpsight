@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scan your own setup · MCPsight docs</title>
+<meta name="description" content="Find your MCP client config and scan every server in it with MCPsight.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Walkthrough</p>
+<h1>Scan your own setup</h1>
+<p class="lede"><code>--from</code> reads your MCP client's config and scans every server in it. Each server's key in the config becomes its name and its baseline key.</p>
+<h2>Where your config lives</h2><div class="table"><table><thead><tr><th>Client</th><th>Config file</th></tr></thead><tbody><tr><td>Claude Desktop, macOS</td><td><code>~/Library/Application Support/Claude/claude_desktop_config.json</code></td></tr><tr><td>Claude Desktop, Windows</td><td><code>%APPDATA%\Claude\claude_desktop_config.json</code></td></tr><tr><td>Claude Code</td><td><code>.mcp.json</code> in your project</td></tr><tr><td>Cursor</td><td><code>~/.cursor/mcp.json</code>, or <code>.cursor/mcp.json</code> in your project</td></tr><tr><td>VS Code</td><td><code>.vscode/mcp.json</code> in your project</td></tr></tbody></table></div>
+<pre data-kind="cmd" data-plain>mcpsight scan --from ~/Library/Application\ Support/Claude/claude_desktop_config.json</pre>
+<p>MCPsight reads an <code>mcpServers</code> object, or <code>servers</code> as VS Code writes it. It understands both kinds of entry:</p><pre data-kind="file" data-label="A local entry and a remote entry">{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": { "DATABASE_URL": "postgres://..." }
+    },
+    "remote-docs": {
+      "url": "https://mcp.example.com/mcp",
+      "headers": { "Authorization": "Bearer ..." }
+    }
+  }
+}</pre>
+<p><code>npx</code> and <code>uvx</code> commands get supply-chain checks too. Any other command runs as a local server, in the sandbox.</p><h2>On macOS and Windows</h2><p>Remote entries scan. Local entries are refused and named, because running them needs the Linux sandbox. This config has one of each:</p><pre data-kind="out" data-label="Output on macOS">  benign-docs
+  Server        benign-docs  (1.2.0, via remote)
+  Grade         C  (60/100)  rubric v1
+
+  Context cost  ~229 tokens  (2 tools)   ~$0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  none declared
+  Drift         baseline recorded (first scan)
+
+  Findings
+  HIGH      Server lists its tools without authentication [authposture.unauthenticated_listing]
+      tools/list returned successfully with no credentials. Anyone who can reach
+      this endpoint can list its tools, and probably call them.
+      fix: Require authentication (OAuth 2.1 or at least a bearer token) before serving
+      tool listings.
+  HIGH      Server is served over plaintext HTTP [authposture.plaintext_http]
+      The endpoint uses http://, so tool traffic and any credentials travel
+      unencrypted.
+      fix: Serve the MCP endpoint over HTTPS.
+
+✗ local: no sandbox backend available (bubblewrap requires Linux; this host is darwin); refusing to run untrusted stdio code. Use --no-sandbox to override (dangerous), or scan remote targets only
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif
+
+exit 2</pre>
+<p>The run exits 2 because one server could not be scanned. The other report is still complete.</p><div class="callout warn"><strong>Do not use <code>--no-sandbox</code> on your own machine.</strong><p>It runs server code with full access to your files and keys. It exists for environments that isolate the process some other way. If you are not sure you are in one, you are not.</p></div>
+<h2>Your next step</h2><p>Commit <code>.mcpsight/baseline.json</code> next to your config, then add the check to CI: <a href="ci.html">Gate pull requests</a>.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

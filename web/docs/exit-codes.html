@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exit codes · MCPsight docs</title>
+<meta name="description" content="MCPsight exit codes 0, 1, and 2, and how to use them in CI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Use it in CI</p>
+<h1>Exit codes</h1>
+<p class="lede">The exit code is the whole interface for CI. Treat 1 and 2 differently.</p>
+<div class="table"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td><code>0</code></td><td>Nothing at or above <code>--fail-on</code>, and no drift.</td></tr><tr><td><code>1</code></td><td>A finding met the threshold, or <code>verify</code> found drift. The scan worked and found a problem.</td></tr><tr><td><code>2</code></td><td>The scan could not run: unreachable server, no sandbox, no baseline, bad flag, or bad input.</td></tr></tbody></table></div>
+<p>Exit 1 means you have a problem. Exit 2 means the tool did not run. Never treat them the same in CI. A scanner that quietly reports clean when it could not scan is worse than none.</p><h2>Moving the threshold</h2><p>The default <code>--fail-on</code> is <code>high</code>. The practice server's <code>/clean</code> URL has two high findings and nothing critical:</p><pre data-kind="cmd">mcpsight scan --fail-on critical http://127.0.0.1:8931/clean; echo "exit $?"
+mcpsight scan --fail-on info http://127.0.0.1:8931/clean; echo "exit $?"</pre>
+<pre data-kind="out" data-label="Output, reports trimmed">exit 0
+exit 1</pre>
+<p>Every finding is printed either way. The threshold only decides the exit code.</p><h2>Several servers</h2><p>MCPsight scans every target even if one fails. If any failed, the run exits 2 at the end.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

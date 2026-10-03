@@ -62,11 +62,11 @@ for the code under scan, which is contained (see §6).
 
 The manifest is **canonicalized** (deterministic key ordering, whitespace,
 Unicode normalization) and hashed (SHA-256). The baseline is committable to git
-(`.mcpsight/baseline.json`); richer history lives in local SQLite. `mcpsight
+(`.mcpsight/baseline.json`). `mcpsight
 verify` fails CI when the live manifest drifts from the committed baseline.
 **Severity derives from the direction of change**: a shortened description is
-noise; a description that *acquires* an imperative instruction, or a capability
-that escalates `fs:read → fs:write`, is critical. This is the feature that keeps
+noise. A description that *acquires* an imperative instruction is critical, and
+a capability that escalates `fs:read → fs:write` is high. This is the feature that keeps
 the tool installed after the first scan.
 
 ## 6. The sandbox as a trust boundary

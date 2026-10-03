@@ -20,7 +20,7 @@
 
 <p align="center">
   <a href="#start-here-scan-the-servers-you-already-have">Quickstart</a> ·
-  <a href="MANUAL.md">Manual</a> ·
+  <a href="https://www.greyquill.io/mcpsight/docs/">Docs</a> ·
   <a href="#what-it-checks">What it checks</a> ·
   <a href="docs/rubric.md">Rubric</a> ·
   <a href="docs/threat-model.md">Threat model</a> ·
@@ -89,7 +89,7 @@ $ mcpsight scan http://127.0.0.1:8931/poisoned
 ```
 
 To run it yourself, clone the repo, start the practice servers with `make fixture`,
-and follow the [hands-on guide](docs/try-it/index.html).
+and follow the [walkthrough](https://www.greyquill.io/mcpsight/docs/practice-servers.html).
 
 Then, in CI, fail the build if a server drifts from the baseline you committed:
 
@@ -109,7 +109,7 @@ $ brew install --cask greyquill/tap/mcpsight      # macOS
 $ go install github.com/greyquill/mcpsight/cmd/mcpsight@latest
 ```
 
-Every release is signed. [MANUAL.md](MANUAL.md#verifying-a-download) shows how to
+Every release is signed. [Verify a download](https://www.greyquill.io/mcpsight/docs/verify-download.html) shows how to
 check yours before you run it.
 
 Scanning **stdio** servers (npx/uvx) executes untrusted code, so it needs a
@@ -143,7 +143,7 @@ or `--from <mcp-config.json>` to scan every server you already have.
 | `--timeout <dur>` | per-server budget (default 30s) · `--dir <path>` · `--no-color` |
 
 Every flag, every rule ID, and every exit code is documented in the
-**[manual](MANUAL.md)**.
+**[docs](https://www.greyquill.io/mcpsight/docs/commands.html)**.
 
 Every scan also writes `.mcpsight/report.json` and `.mcpsight/report.sarif`, and
 records or updates `.mcpsight/baseline.json`. Commit that last one, because a
@@ -190,7 +190,7 @@ established this design.
 
 | Document | What it covers |
 |---|---|
-| [MANUAL.md](MANUAL.md) | The complete reference: every flag, rule ID, exit code, and limitation |
+| [Documentation](https://www.greyquill.io/mcpsight/docs/) | Install, walkthroughs, CI, and the full reference: every flag, rule, and exit code |
 | [docs/rubric.md](docs/rubric.md) | The score, in full, versioned. Recompute any grade by hand |
 | [docs/threat-model.md](docs/threat-model.md) | What we defend against, and what we deliberately do not |
 | [docs/ci.md](docs/ci.md) | Ready-to-use CI workflows |
@@ -256,7 +256,7 @@ Pre-release. What works today:
   self-host it today. The public index is not published yet.
 
 What it does not do yet is in the [threat model](docs/threat-model.md) and
-[known limitations](MANUAL.md#known-limitations). The biggest one is that code
+[docs](https://www.greyquill.io/mcpsight/docs/protection.html). The biggest one is that code
 written to dodge strace can hide what it does.
 
 ## Open-core boundary

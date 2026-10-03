@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/greyquill/mcpsight/internal/crawl"
@@ -77,7 +78,7 @@ func root() *cobra.Command {
 // opens it in the browser — no database required. This is the run-and-open path
 // for reviewing the published UI locally.
 func previewCmd() *cobra.Command {
-	var webDir, addr string
+	var webDir, addr, path string
 	var noOpen bool
 	c := &cobra.Command{
 		Use:   "preview",
@@ -90,7 +91,7 @@ func previewCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			url := "http://" + ln.Addr().String() + "/"
+			url := "http://" + ln.Addr().String() + "/" + strings.TrimPrefix(path, "/")
 			fmt.Printf("mcpsight index preview: %s  (serving %s)\n", url, webDir)
 			if !noOpen {
 				if err := index.OpenBrowser(url); err != nil {
@@ -103,6 +104,7 @@ func previewCmd() *cobra.Command {
 	c.Flags().StringVar(&webDir, "web", "web", "directory containing the static site")
 	c.Flags().StringVar(&addr, "addr", "127.0.0.1:8099", "listen address")
 	c.Flags().BoolVar(&noOpen, "no-open", false, "do not open a browser")
+	c.Flags().StringVar(&path, "path", "", "page to open, relative to the site root (e.g. docs/)")
 	return c
 }
 

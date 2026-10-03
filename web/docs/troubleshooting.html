@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Troubleshooting · MCPsight docs</title>
+<meta name="description" content="Fixes for common MCPsight errors.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Reference</p>
+<h1>Troubleshooting</h1>
+<p class="lede">The errors people hit most, what they mean, and what to do.</p>
+<h2><code>no sandbox backend available</code></h2><p>You tried to scan a local server without bubblewrap. Install it on Linux (<code>sudo apt-get install -y bubblewrap</code>), or scan remote servers. macOS and Windows have no bubblewrap. The refusal is deliberate.</p><h2 id="ubuntu-24-04-blocks-bubblewrap">Ubuntu 24.04 blocks bubblewrap</h2><p>Ubuntu 24.04 stops unprivileged programs from creating user namespaces, which bubblewrap needs. You see errors like this:</p><pre data-kind="out" data-label="Error">bwrap: setting up uid map: Permission denied
+bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted</pre>
+<p>The usual advice turns the protection off for every program. This profile exempts bubblewrap only, and survives a reboot:</p><pre data-kind="cmd" data-plain>sudo tee /etc/apparmor.d/bwrap &gt;/dev/null &lt;&lt;'EOF'
+abi &lt;abi/4.0&gt;,
+include &lt;tunables/global&gt;
+
+profile bwrap /usr/bin/bwrap flags=(unconfined) {
+  userns,
+  include if exists &lt;local/bwrap&gt;
+}
+EOF
+sudo apparmor_parser -r /etc/apparmor.d/bwrap</pre>
+<h2><code>capability.not_observed</code> on a local server</h2><p>Install strace. Without it the sandbox still contains the server, but nothing watches it, so credential reads and connections cannot be caught. <code>docker:</code> targets and <code>--no-sandbox</code> runs get the same finding, because neither is watched yet.</p><h2><code>no baseline recorded</code></h2><p><code>verify</code> never creates a baseline. Run <code>scan</code> once and commit <code>.mcpsight/baseline.json</code>.</p><pre data-kind="out" data-label="Output">✗ http://127.0.0.1:8931/clean: no baseline recorded. Run 'mcpsight scan' first
+exit 2</pre>
+<h2>The server times out</h2><p>The default budget is 30 seconds per server. Package servers that download on first run often need more. Use <code>--timeout 120s</code>.</p><h2>A local server will not start in the sandbox</h2><p>It probably needs the network while it starts. Retry with <code>--allow-net</code>. Connection findings are not reported for that run.</p><h2><code>server sent a message larger than 16 MiB</code></h2><p>MCPsight reads at most 16 MiB per message, so a hostile server cannot exhaust your memory. Real tool lists are a few kilobytes. If an honest server hits this, <a href="https://github.com/greyquill/mcpsight/issues">open an issue</a>.</p><h2><code>\x1b</code> and similar in the output</h2><p>MCPsight shows control characters from a server as visible escapes, so a server cannot clear your screen, change your window title, or fake report lines.</p><h2>Drift on every scan</h2><p>Something in the server's tool list changes every time, such as a timestamp in a description. Compare runs in <code>report.json</code>. That is worth reporting to the server's maintainer, because it hides real changes for everyone.</p><h2>No supply-chain findings</h2><p>You ran with <code>--offline</code>, the target is not a package, or the machine cannot reach OSV.dev and the package registry.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

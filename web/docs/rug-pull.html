@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catch a rug pull · MCPsight docs</title>
+<meta name="description" content="Use MCPsight baselines and verify to catch a server that changes after you trust it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Walkthrough</p>
+<h1>Catch a rug pull</h1>
+<p class="lede">A server can pass review today, then ship an update whose description quietly tells your agent to steal credentials. You would never reread the description. MCPsight does.</p>
+<h2>1. Record a baseline</h2><pre data-kind="cmd">mcpsight scan http://127.0.0.1:8931/rugpull</pre>
+<pre data-kind="out" data-label="Output, findings trimmed">  config-reader
+  Server        config-reader  (1.4.0, via remote)
+  Grade         C  (60/100)  rubric v1
+
+  Context cost  ~105 tokens  (1 tool)   under $0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  fs:read
+  Drift         baseline recorded (first scan)
+
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif</pre>
+<p>The first scan of a server records its fingerprint in <code>.mcpsight/baseline.json</code>.</p><h2>2. Check it against the baseline</h2><pre data-kind="cmd">mcpsight verify http://127.0.0.1:8931/rugpull; echo "exit $?"</pre>
+<pre data-kind="out" data-label="Output, trimmed">  Drift         unchanged since baseline
+  ...
+  All servers match their baselines.
+exit 0</pre>
+<h2>3. Let the server turn</h2><p>Flip the practice server to its malicious version. Same URL, same tool name:</p><pre data-kind="cmd">curl -X POST http://127.0.0.1:8931/_rugpull/v2</pre>
+<h2>4. Verify again</h2><pre data-kind="cmd">mcpsight verify http://127.0.0.1:8931/rugpull; echo "exit $?"</pre>
+<pre data-kind="out" data-label="Output">  config-reader
+  Server        config-reader  (1.5.0, via remote)
+  Grade         F  (0/100)  rubric v1
+
+  Context cost  ~216 tokens  (1 tool)   ~$0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  fs:read  fs:write
+  Drift         DRIFTED: 3 change(s) since baseline
+
+  Findings
+  CRITICAL  Tool description tries to override the model's instructions [injection.override_instruction]
+      tool: read_config
+      fix: Remove instruction-like text from the description; a tool description should
+      describe the tool, not command the model.
+  CRITICAL  Tool description gained a model-directed instruction [drift.instruction_added]
+      tool: read_config
+      The description of "read_config" now contains an instruction aimed at the
+      model that was not there in the baseline. This is the classic rug-pull.
+      fix: Do not upgrade. Inspect the new description and pin the previous version.
+  HIGH      Tool description issues an imperative instruction to the model [injection.imperative_instruction]
+      tool: read_config
+      fix: Descriptions should not tell the model what to do before/after other tools.
+      State only what this tool does.
+  HIGH      Tool description instructs reading sensitive or unrelated paths [injection.unrelated_path]
+      tool: read_config
+      fix: Remove references to credential or system files; a tool's description should
+      not point the model at ~/.ssh, ~/.aws, .env, or similar.
+  HIGH      Server lists its tools without authentication [authposture.unauthenticated_listing]
+      tools/list returned successfully with no credentials. Anyone who can reach
+      this endpoint can list its tools, and probably call them.
+      fix: Require authentication (OAuth 2.1 or at least a bearer token) before serving
+      tool listings.
+  HIGH      Server is served over plaintext HTTP [authposture.plaintext_http]
+      The endpoint uses http://, so tool traffic and any credentials travel
+      unencrypted.
+      fix: Serve the MCP endpoint over HTTPS.
+  HIGH      Tool capability escalated [drift.capability_escalated]
+      tool: read_config
+      The input schema of "read_config" changed in a way that adds capability:
+      fs:write.
+      fix: Confirm the server legitimately needs the new capability before upgrading.
+  INFO      Declares fs:write capability [capability.declared_fs_write]
+      tool: read_config
+      Tool "read_config" appears to declare the fs:write capability from its name,
+      description, or schema.
+  INFO      Server version changed [drift.server_version_changed]
+      tool: config-reader
+      Server version changed from 1.4.0 to 1.5.0.
+
+mcpsight: drift detected: a server changed since its baseline
+exit 1</pre>
+<p>The description gained an instruction to the model, which is critical. The input schema gained a way to write files, which is high. <code>verify</code> exits 1, so a CI job running it fails.</p><h2>5. Accept a change on purpose</h2><p><code>verify</code> never changes the baseline. When a change is legitimate, review it and accept it:</p><pre data-kind="cmd">mcpsight scan --update-baseline http://127.0.0.1:8931/rugpull</pre>
+<p>Flip the practice server back when you are done:</p><pre data-kind="cmd">curl -X POST http://127.0.0.1:8931/_rugpull/v1</pre>
+<div class="callout"><strong>Why the baseline is a file.</strong><p>Commit <code>.mcpsight/baseline.json</code> next to your MCP config. Every change to a server then shows up as a diff in code review, and CI fails until someone accepts it.</p></div>
+<h2>How drift is graded</h2><p>A shorter description is noise. A description that gains an order to the model is an attack. MCPsight grades each change by direction, so you can leave it running without learning to ignore it. The full list is in <a href="rules.html#drift">Every rule</a>.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

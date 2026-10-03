@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install · MCPsight docs</title>
+<meta name="description" content="Install MCPsight on macOS, Linux, or Windows, and set up the Linux sandbox.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Get started</p>
+<h1>Install</h1>
+<p class="lede">MCPsight is a single binary with no runtime dependencies. Pick the install that suits you, then check it runs.</p>
+<h2>macOS with Homebrew</h2><pre data-kind="cmd">brew install --cask greyquill/tap/mcpsight</pre>
+<h2>Download a release</h2><p>Every <a href="https://github.com/greyquill/mcpsight/releases">release</a> has builds for macOS, Linux, and Windows on amd64 and arm64. Unpack the archive and put <code>mcpsight</code> on your <code>PATH</code>. Before you run it, <a href="verify-download.html">verify the download</a>. It takes a minute.</p><h2>With Go</h2><p>You need Go 1.26 or later.</p><pre data-kind="cmd">go install github.com/greyquill/mcpsight/cmd/mcpsight@latest</pre>
+<h2>From source</h2><pre data-kind="cmd">git clone https://github.com/greyquill/mcpsight &amp;&amp; cd mcpsight
+make build     # writes bin/mcpsight</pre>
+<h2>Check it runs</h2><pre data-kind="cmd">mcpsight version</pre>
+<pre data-kind="out" data-label="Output (your version will differ)">mcpsight v0.1.0 (commit 1a2b3c4, rubric v1)</pre>
+<p>The rubric version tells you which scoring rules this build uses. It matters when you compare grades over time.</p><h2>What each platform can scan</h2><p>Scanning a local server means running its code, so that part needs the Linux sandbox.</p><div class="table"><table><thead><tr><th>Target</th><th>macOS</th><th>Windows</th><th>Linux</th></tr></thead><tbody><tr><td>Remote server, <code>https://</code></td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>Local server, <code>npx:</code>, <code>uvx:</code>, or a command</td><td>Refused</td><td>Refused</td><td>Yes, with bubblewrap</td></tr><tr><td>Container, <code>docker:</code></td><td>With Docker</td><td>With Docker</td><td>With Docker</td></tr></tbody></table></div>
+<h2>Set up the Linux sandbox</h2><p>Install bubblewrap to run local servers safely, and strace so MCPsight can watch what they do:</p><pre data-kind="cmd">sudo apt-get install -y bubblewrap strace</pre>
+<p>Without bubblewrap, MCPsight refuses local servers instead of running them unprotected. Without strace, it runs them but cannot watch them, and the report says so.</p><div class="callout warn"><strong>Ubuntu 24.04 blocks bubblewrap by default.</strong><p>See <a href="troubleshooting.html#ubuntu-24-04-blocks-bubblewrap">Troubleshooting</a> for a fix that exempts bubblewrap only.</p></div>
+</article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading a report · MCPsight docs</title>
+<meta name="description" content="What each line of an MCPsight report means.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Get started</p>
+<h1>Reading a report</h1>
+<p class="lede">Every report has the same shape: a summary of the server, then its findings, worst first.</p>
+<pre data-kind="out" data-label="Output">  benign-docs
+  Server        benign-docs  (1.2.0, via remote)
+  Grade         C  (60/100)  rubric v1
+
+  Context cost  ~229 tokens  (2 tools)   ~$0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  none declared
+  Drift         baseline recorded (first scan)
+
+  Findings
+  HIGH      Server lists its tools without authentication [authposture.unauthenticated_listing]
+      tools/list returned successfully with no credentials. Anyone who can reach
+      this endpoint can list its tools, and probably call them.
+      fix: Require authentication (OAuth 2.1 or at least a bearer token) before serving
+      tool listings.
+  HIGH      Server is served over plaintext HTTP [authposture.plaintext_http]
+      The endpoint uses http://, so tool traffic and any credentials travel
+      unencrypted.
+      fix: Serve the MCP endpoint over HTTPS.
+
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif</pre>
+<h2>The summary</h2><div class="table"><table><thead><tr><th>Line</th><th>What it tells you</th></tr></thead><tbody><tr><td>Server</td><td>The name and version the server reports, and how MCPsight reached it: <code>remote</code>, <code>bubblewrap</code>, or <code>docker</code>.</td></tr><tr><td>Grade</td><td>A letter and a score out of 100. Each finding subtracts points by severity. <a href="scoring.html">How scoring works</a> lets you redo the sum by hand.</td></tr><tr><td>Context cost</td><td>Tokens the tool definitions add to every request your agent makes, with a cost per request. It is an estimate, and the line says so.</td></tr><tr><td>Capabilities</td><td>What the tools say they can do: read or write files, run shell commands, reach the network, read secrets, run code. MCPsight infers this from names, descriptions, and inputs.</td></tr><tr><td>Drift</td><td>Whether the server changed since its baseline. The first scan records one.</td></tr></tbody></table></div>
+<h2>A finding</h2><p>Each finding has four parts:</p><ul><li><b>Severity</b>, from critical down to info. It decides the penalty.</li><li><b>A title and a rule ID</b> in brackets, such as <code>authposture.plaintext_http</code>. Rule IDs never change meaning, so you can track them. <a href="rules.html">Every rule</a> lists them all.</li><li><b>The tool</b> it applies to, when it is about one tool.</li><li><b>An explanation and a fix.</b></li></ul><div class="table"><table><thead><tr><th>Severity</th><th>Penalty</th><th>What it usually means</th></tr></thead><tbody><tr><td><span class="sev critical">critical</span></td><td>40, and the grade is capped at F</td><td>Stop. Credential theft, or a description that overrides the model.</td></tr><tr><td><span class="sev high">high</span></td><td>20</td><td>A real risk you should fix or understand before you trust the server.</td></tr><tr><td><span class="sev medium">medium</span></td><td>8</td><td>Worth fixing. Hidden payloads, schema changes, missing source.</td></tr><tr><td><span class="sev low">low</span></td><td>3</td><td>Housekeeping. Large descriptions, young packages.</td></tr><tr><td><span class="sev info">info</span></td><td>0</td><td>Recorded so you can see it. Declared capabilities, skipped checks.</td></tr></tbody></table></div>
+<h2>Notes on the grade line</h2><p>Two notes can appear after the score. <b>Capped by a critical finding</b> means one critical finding held the grade at F, whatever the rest says. <b>Behavior not observed</b> means MCPsight ran a local server but could not watch it, so the grade covers what the server declared, not what it did. Install strace to fix that.</p><h2>Token estimates</h2><p>Token counts come from MCPsight's own estimator and carry <code>(est.)</code>. Use them to compare servers and spot bloat. Do not bill anyone from them.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

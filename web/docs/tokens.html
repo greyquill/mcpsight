@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Servers that need a token · MCPsight docs</title>
+<meta name="description" content="Scan remote MCP servers that require a bearer token or other headers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Walkthrough</p>
+<h1>Servers that need a token</h1>
+<p class="lede">Many remote servers need a token. You pass it through a config file, in the same format your MCP client already uses.</p>
+<h2>Without a token</h2><pre data-kind="cmd">mcpsight scan http://127.0.0.1:8931/auth/clean; echo "exit $?"</pre>
+<pre data-kind="out" data-label="Output">✗ http://127.0.0.1:8931/auth/clean: probing http://127.0.0.1:8931/auth/clean: initialize: http 401: missing or wrong bearer token
+exit 2</pre>
+<p>Exit code 2 means the scan could not run. It is never reported as clean.</p><h2>With a token</h2><p>Describe the server in a config file with its headers:</p><pre data-kind="file" data-label="servers.json">{
+  "mcpServers": {
+    "docs-with-token": {
+      "url": "http://127.0.0.1:8931/auth/clean",
+      "headers": { "Authorization": "Bearer fixture-token" }
+    }
+  }
+}</pre>
+<pre data-kind="cmd">mcpsight scan --from servers.json</pre>
+<pre data-kind="out" data-label="Output">  benign-docs
+  Server        benign-docs  (1.2.0, via remote)
+  Grade         B  (80/100)  rubric v1
+
+  Context cost  ~229 tokens  (2 tools)   ~$0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  none declared
+  Drift         baseline recorded (first scan)
+
+  Findings
+  HIGH      Server is served over plaintext HTTP [authposture.plaintext_http]
+      The endpoint uses http://, so tool traffic and any credentials travel
+      unencrypted.
+      fix: Serve the MCP endpoint over HTTPS.
+
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif</pre>
+<p>The grade rises to B. MCPsight scanned once with your token, then once without. The second attempt was refused, so the server does not list its tools to strangers, and that finding is gone. Plain HTTP is still flagged.</p><div class="callout"><strong>Your secrets stay out of reports.</strong><p>MCPsight writes header and environment values as <code>[redacted]</code> in <code>report.json</code> and <code>report.sarif</code>, and keeps only their names.</p></div>
+</article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>

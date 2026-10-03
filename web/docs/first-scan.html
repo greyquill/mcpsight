@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your first scan · MCPsight docs</title>
+<meta name="description" content="Scan your MCP config or a single server with MCPsight.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=4">
+<script>try{var t=localStorage.getItem("mcpsight.theme");if(t&&t!=="system")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<main class="content">
+<article class="doc">
+<p class="crumb">Get started</p>
+<h1>Your first scan</h1>
+<p class="lede">Point MCPsight at the servers you already use, or at one URL. A scan takes a few seconds.</p>
+<h2>Scan your MCP config</h2><p>MCPsight reads the same config file your client uses and scans every server in it:</p><pre data-kind="cmd">mcpsight scan --from claude_desktop_config.json</pre>
+<p>It understands Claude Desktop, Claude Code, Cursor, and VS Code configs. <a href="your-setup.html">Scan your own setup</a> lists where each one keeps its file.</p><h2>Scan one server</h2><pre data-kind="cmd">mcpsight scan https://mcp.example.com/mcp</pre>
+<p>On Linux you can also scan a package directly, such as <code>npx:@modelcontextprotocol/server-everything</code>. It runs in the sandbox.</p><h2>What you see</h2><p>This is a scan of a practice server that ships with MCPsight. Its tools are harmless, but it is served badly:</p><pre data-kind="cmd">mcpsight scan http://127.0.0.1:8931/clean</pre>
+<pre data-kind="out" data-label="Output">  benign-docs
+  Server        benign-docs  (1.2.0, via remote)
+  Grade         C  (60/100)  rubric v1
+
+  Context cost  ~229 tokens  (2 tools)   ~$0.001 per request @ Claude Sonnet  (est.)
+  Capabilities  none declared
+  Drift         baseline recorded (first scan)
+
+  Findings
+  HIGH      Server lists its tools without authentication [authposture.unauthenticated_listing]
+      tools/list returned successfully with no credentials. Anyone who can reach
+      this endpoint can list its tools, and probably call them.
+      fix: Require authentication (OAuth 2.1 or at least a bearer token) before serving
+      tool listings.
+  HIGH      Server is served over plaintext HTTP [authposture.plaintext_http]
+      The endpoint uses http://, so tool traffic and any credentials travel
+      unencrypted.
+      fix: Serve the MCP endpoint over HTTPS.
+
+  Report: .mcpsight/report.json  |  SARIF: .mcpsight/report.sarif</pre>
+<p>The grade is C because anyone can list its tools, and it uses plain HTTP. The same server on HTTPS with authentication would grade A. <a href="reading-a-report.html">Reading a report</a> walks through every line.</p><h2>What it wrote</h2><p>Each scan writes a <code>.mcpsight/</code> folder in the current directory:</p><div class="table"><table><thead><tr><th>File</th><th>What it holds</th><th>Commit it?</th></tr></thead><tbody><tr><td><code>baseline.json</code></td><td>A fingerprint of each server, recorded on its first scan</td><td>Yes</td></tr><tr><td><code>report.json</code></td><td>The full report from the last scan</td><td>No</td></tr><tr><td><code>report.sarif</code></td><td>The same findings for GitHub code scanning</td><td>No</td></tr></tbody></table></div>
+<p>Committing the baseline is what lets MCPsight tell you later that a server changed. <code>--dir</code> puts the folder somewhere else.</p></article>
+</main>
+<aside class="toc" id="toc" aria-label="On this page"></aside>
+</div>
+<script src="assets/docs.js?v=4"></script>
+</body>
+</html>
