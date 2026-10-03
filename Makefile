@@ -4,7 +4,7 @@ COMMIT  ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 PKG     := github.com/greyquill/mcpsight/internal/buildinfo
 LDFLAGS := -s -w -X '$(PKG).Version=$(VERSION)' -X '$(PKG).Commit=$(COMMIT)'
 
-.PHONY: all build build-index test vet fmt tidy clean preview docs fixture
+.PHONY: all build build-index test vet fmt tidy clean preview docs site fixture
 
 all: vet test build
 
@@ -16,6 +16,10 @@ build-index:
 
 # Serve the static Registry Security Index and open it in a browser (no database).
 preview: build-index
+	./bin/mcpsight-index preview --path index/
+
+# Serve the landing page and open it in a browser.
+site: build-index
 	./bin/mcpsight-index preview
 
 # Serve the documentation site (web/docs) and open it in a browser.
