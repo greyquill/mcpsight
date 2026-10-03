@@ -59,7 +59,7 @@ homebrew_casks:
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     directory: Casks
-    homepage: https://www.greyquill.io/mcpsight/
+    homepage: https://mcpsight.dev/
     description: Inspect an MCP server before you trust it
     license: Apache-2.0
     commit_author:

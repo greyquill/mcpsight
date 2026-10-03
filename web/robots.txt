@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /index/
+
+Sitemap: https://mcpsight.dev/sitemap.xml

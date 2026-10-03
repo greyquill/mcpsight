@@ -1,7 +1,6 @@
 # Publishes the static Registry Security Index (web/) to GitHub Pages.
-# Because the org's Pages apex is www.greyquill.io, this project site is served
-# at https://www.greyquill.io/mcpsight/ once the repo is public and Pages is
-# enabled (Settings → Pages → Source: GitHub Actions).
+# Served at https://mcpsight.dev/, the custom domain set in Settings → Pages
+# (Source: GitHub Actions). DNS for mcpsight.dev points at GitHub Pages.
 #
 # The site reads web/data/snapshot.json, which the index publishes:
 #   mcpsight-index scan-batch ... && mcpsight-index snapshot -o web/data/snapshot.json

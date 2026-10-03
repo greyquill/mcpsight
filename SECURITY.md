@@ -58,4 +58,4 @@ We fix security issues in the latest release only. Upgrade to get a fix.
 
 Every release ships a `checksums.txt`, signed with [Sigstore](https://www.sigstore.dev)
 from our GitHub release workflow, plus a build provenance attestation for each
-archive. See [Verify a download](https://www.greyquill.io/mcpsight/docs/verify-download.html).
+archive. See [Verify a download](https://mcpsight.dev/docs/verify-download.html).
